@@ -1,0 +1,7 @@
+{
+  "name": "logistix",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

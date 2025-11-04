@@ -1,0 +1,244 @@
+<ion-content [fullscreen]="true">
+  <div class="contenedor">
+    <div class="contenido">
+
+      <!-- ───────────── Ajustes Generales ───────────── -->
+      <mat-card class="cardWithShadow mb-4">
+        <mat-card-header>
+          <mat-card-title>Ajustes</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="generalForm" class="row gx-3">
+            <div class="col-md-4">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Modo de Orden</mat-label>
+                <mat-select formControlName="default_sort_mode">
+                  <mat-option value="FEFO">FEFO</mat-option>
+                  <mat-option value="FIFO">FIFO</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="col-md-4">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Días de Aviso</mat-label>
+                <input matInput type="number" formControlName="warning_days" />
+              </mat-form-field>
+            </div>
+            <div class="col-md-4">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Días Críticos</mat-label>
+                <input matInput type="number" formControlName="critical_days" />
+              </mat-form-field>
+            </div>
+
+            <div class="col-12 text-end">
+              <button mat-flat-button color="primary" (click)="saveGeneral()"
+                [disabled]="!generalForm.valid">
+                Guardar Ajustes
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="cardWithShadow mb-4">
+        <mat-card-header>
+          <mat-card-title>Notificaciones</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content [formGroup]="notifsForm">
+          <div formArrayName="items">
+            <div class="row gx-3 "
+              *ngFor="let grp of itemsFA.controls; let i = index"
+              [formGroupName]="i" style="margin-bottom: 16px; align-items: flex-start;">
+
+              <!-- Toggle + título + tooltip -->
+              <div class="col-md-2 d-flex align-items-center" style="gap:8px;">
+                <mat-checkbox formControlName="enabled"
+                  color="primary"></mat-checkbox>
+
+                <div>
+                  <div >{{ grp.get('label')?.value }} <mat-icon matTooltip="{{ grp.get('description')?.value }}"
+                      fontIcon="info"
+                      class="m-r-4"
+                      style="vertical-align: middle; font-size: 16px;"></mat-icon></div>
+                  
+                </div>
+              </div>
+
+              <!-- Emails -->
+              <div class="col-md-10">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>E-mails destino separados por coma.</mat-label>
+                  <input matInput formControlName="emails"
+                    placeholder="ops@tienda.com, gerente@tienda.com" />
+                  <mat-error
+                    *ngIf="grp.get('emails')?.hasError('invalidEmails')">
+                    Revisa el formato de los e-mails (usa comas para separar).
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-end">
+            <button mat-flat-button color="primary"
+              (click)="saveNotifications()"
+              [disabled]="!notifsForm.valid">
+              Guardar Notificaciones
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- ───────────── Datos de Facturación ───────────── -->
+      <mat-card class="cardWithShadow mb-4">
+        <mat-card-header>
+          <mat-card-title>Datos de Facturación para Albaranes</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="billingForm" class="row gx-3">
+            <div class="col-md-6">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Nombre Fiscal</mat-label>
+                <input matInput formControlName="nombre_fiscal" placeholder="Empresa S.L." />
+              </mat-form-field>
+            </div>
+            <div class="col-md-6">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>CIF/NIF</mat-label>
+                <input matInput formControlName="cif" placeholder="B12345678" />
+              </mat-form-field>
+            </div>
+            <div class="col-md-12">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Dirección Fiscal</mat-label>
+                <input matInput formControlName="direccion_fiscal" placeholder="Calle Principal 123" />
+              </mat-form-field>
+            </div>
+            <div class="col-md-4">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Código Postal</mat-label>
+                <input matInput formControlName="codigo_postal_fiscal" placeholder="28001" />
+              </mat-form-field>
+            </div>
+            <div class="col-md-4">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Teléfono</mat-label>
+                <input matInput formControlName="telefono_fiscal" placeholder="+34 912 345 678" />
+              </mat-form-field>
+            </div>
+            <div class="col-md-4">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Email</mat-label>
+                <input matInput type="email" formControlName="email_fiscal" placeholder="info@empresa.com" />
+                <mat-error *ngIf="billingForm.get('email_fiscal')?.hasError('email')">
+                  Por favor ingresa un email válido
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="col-12 text-end">
+              <button mat-flat-button color="primary" (click)="saveBillingData()"
+                [disabled]="!billingForm.valid">
+                Guardar Datos de Facturación
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- ───────────── Integraciones ───────────── -->
+      <mat-card class="cardWithShadow" *ngIf="role === 'admin'">
+        <mat-card-header>
+          <mat-card-title>Integraciones</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-accordion multi>
+            <form [formGroup]="shopifyForm">
+              <!--<mat-expansion-panel [expanded]="true">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    SendCloud
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="col-md-4">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>ID de integración Sendcloud</mat-label>
+                    <input matInput type="number"
+                      formControlName="sendcloud_integration_id" />
+                  </mat-form-field>
+                </div>
+              </mat-expansion-panel>-->
+
+              <!-- Shopify -->
+              <mat-expansion-panel [expanded]="true">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    Shopify
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+
+                <div class="col-md-6">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Dominio de la tienda</mat-label>
+                    <input matInput placeholder="mystore.myshopify.com"
+                      formControlName="dominio_shopify" />
+                  </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Clave Admin</mat-label>
+                    <input matInput type="password"
+                      formControlName="token_acceso" />
+                  </mat-form-field>
+                </div>
+                <div class="col-6 text-end">
+                  <button mat-flat-button color="primary"
+                    (click)="importShopifyProducts()"
+                    [disabled]="!shopifyForm.valid">
+                    {{ shopifyEnabled ? 'Actualizar Datos' : 'Conectar Shopify'
+                    }}
+                  </button>
+                </div>
+                <div class="col-6 text-end">
+                  @if (shopifyEnabled) {
+                  <button mat-flat-button color="danger"
+                    (click)="toggleShopify()" style="float:right;">
+                    Desconectar shopify
+                  </button>
+                  }
+
+                </div>
+
+              </mat-expansion-panel>
+
+              <!-- WooCommerce (deshabilitada por ahora) -->
+              <mat-expansion-panel disabled>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>WooCommerce (Próximamente)</mat-panel-title>
+                </mat-expansion-panel-header>
+              </mat-expansion-panel>
+
+              <!-- PrestaShop -->
+              <mat-expansion-panel disabled>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>PrestaShop (Próximamente)</mat-panel-title>
+                </mat-expansion-panel-header>
+              </mat-expansion-panel>
+
+              <!-- Amazon -->
+              <mat-expansion-panel disabled>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>Amazon (Próximamente)</mat-panel-title>
+                </mat-expansion-panel-header>
+              </mat-expansion-panel>
+            </form>
+
+          </mat-accordion>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+  </div>
+</ion-content>

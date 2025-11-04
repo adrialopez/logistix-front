@@ -1,0 +1,359 @@
+<div
+	class="d-flex align-items-center justify-content-between m-b-8 p-x-20 p-t-16">
+	<h3>{{ action }} Entrada</h3>
+	<button mat-icon-button mat-dialog-close class="d-flex justify-content-center">
+		<i-tabler name="x" class="icon-20 d-flex"></i-tabler>
+	</button>
+</div>
+
+<!-- ======================================================== -->
+<!-- FORMULARIO NORMAL (Add / Update / View) -->
+<!-- ======================================================== -->
+<mat-dialog-content *ngIf="action !== 'Delete' && action !== 'Validar'">
+	<form #pedidoForm="ngForm" class="container-fluid">
+		<div class="row mb-3">
+			<!-- Nº albarán -->
+			<div class="col-lg-6">
+				<mat-form-field appearance="outline" class="w-100 ">
+					<mat-label>Nº albarán</mat-label>
+					<input [disabled]="soloLectura" matInput name="reference"
+						[(ngModel)]="local_data.reference"
+						[ngModelOptions]="{ standalone: true }" placeholder="Nº albarán"
+						style="font-size: 14px;" />
+				</mat-form-field>
+			</div>
+			<div class="col-lg-6">
+				<mat-form-field appearance="outline" class="w-100 ">
+					<mat-label>Proveedor</mat-label>
+					<input [disabled]="soloLectura" matInput name="proveedor"
+						[(ngModel)]="local_data.client_order_number"
+						[ngModelOptions]="{ standalone: true }"
+						placeholder="Nombre del proveedor" style="font-size: 14px;" />
+				</mat-form-field>
+			</div>
+
+			<!-- Fecha de llegada -->
+			<div class="col-lg-4">
+				<mat-label class="f-s-14 f-w-600 m-b-8 d-block">Fecha de llegada</mat-label>
+
+				<!-- 👇 Si no es solo lectura, usamos el datepicker -->
+				<mat-form-field appearance="outline" class="w-100" *ngIf="!soloLectura">
+					<input matInput [matDatepicker]="arrivalPicker" [formControl]="joiningDate"
+						placeholder="Introducir fecha"
+						(focus)="!soloLectura && arrivalPicker.open()" />
+					<mat-datepicker-toggle matSuffix
+						[for]="arrivalPicker"></mat-datepicker-toggle>
+					<mat-datepicker #arrivalPicker></mat-datepicker>
+				</mat-form-field>
+
+				<mat-form-field appearance="outline" class="w-100" *ngIf="soloLectura">
+					<input matInput
+						[value]="joiningDate.value ? (joiningDate.value | date:'dd/MM/yyyy') : '—'"
+						readonly />
+				</mat-form-field>
+			</div>
+
+			<!-- Almacén -->
+			<div class="col-lg-4">
+				<mat-label class="f-s-14 f-w-600 m-b-8 d-block">Almacén</mat-label>
+				<mat-form-field appearance="outline" class="w-100">
+					<mat-select [disabled]="soloLectura" placeholder="Selecciona almacén"
+						[(ngModel)]="selectedLocation"
+						[ngModelOptions]="{ standalone: true }" name="warehouse" required>
+
+						<mat-option *ngFor="let warehouse of locationOptions"
+							[value]="warehouse.value">
+							{{ warehouse.label }}
+						</mat-option>
+					</mat-select>
+
+					<!-- 🔹 Error si no hay almacén seleccionado -->
+					<mat-error *ngIf="!selectedLocation">
+						Debes seleccionar un almacén
+					</mat-error>
+				</mat-form-field>
+			</div>
+			<div class="col-lg-4" style="display: flex;align-items: center;">
+				<mat-checkbox
+					[disabled]="action !== 'Add' || soloLectura"
+					[(ngModel)]="local_data.require_warehouse_validation"
+					[ngModelOptions]="{ standalone: true }">
+					Validar en almacén (no sumar stock hasta validar)
+				</mat-checkbox>
+			</div>
+
+		</div>
+
+		<h5 class="mb-2"
+			style="margin-bottom: .75em; flex: 0 0 12.5%; max-width: 12.5%; padding: 0 8px;">Lineas</h5>
+
+		<!-- Edición de líneas -->
+		<div>
+			<div class="row mb-2" *ngFor="let item of local_data.lineas; let i = index"
+				style="align-items: flex-start;">
+
+				<div class="col-lg-1 d-flex align-items-center justify-content-end px-0">
+					<img *ngIf="item.product_image" [src]="item.product_image"
+						alt="Imagen {{ item.product_name }}"
+						width="37" height="37" style="border-radius:4px; height:37px;" />
+				</div>
+
+				<!-- Producto -->
+				<div class="col-lg-3" style="width: 100%;">
+					<mat-form-field appearance="outline" class="w-100" style="width: 103%;">
+						<mat-label>Producto</mat-label>
+						<input
+							type="text"
+							matInput
+							[disabled]="soloLectura"
+							[matAutocomplete]="autoProducto"
+							[(ngModel)]="item.product_label"
+							name="product_{{i}}"
+							(ngModelChange)="filterProductos($event, i)"
+							placeholder="Producto" />
+
+						<mat-autocomplete #autoProducto="matAutocomplete" autoActiveFirstOption
+							(optionSelected)="onProductoSelected($event.option.value, i)">
+							<mat-option *ngFor="let p of (filteredProductos[i] || [])" [value]="p">
+								{{ p.label }}
+							</mat-option>
+						</mat-autocomplete>
+					</mat-form-field>
+				</div>
+
+				<!-- Variante -->
+				<div
+					[ngClass]="{'col-lg-2': action !== 'Add', 'col-lg-3': action === 'Add'}">
+					<mat-form-field appearance="outline" class="w-100" style="width: 107%;">
+						<mat-label>Variante</mat-label>
+						<input
+							type="text"
+							matInput
+							[disabled]="soloLectura"
+							[matAutocomplete]="autoVariante"
+							[(ngModel)]="item.variant_label"
+							name="variant_{{i}}"
+							(ngModelChange)="filterVariantes($event || '', i)"
+							placeholder="Variante" />
+
+						<mat-autocomplete #autoVariante="matAutocomplete"
+							(optionSelected)="onVarianteSelected($event.option.value, i)">
+							<mat-option *ngFor="let v of (filteredVariantes[i] || [])" [value]="v">
+								{{ v.label }}
+							</mat-option>
+						</mat-autocomplete>
+					</mat-form-field>
+				</div>
+
+				<!-- Cantidad -->
+				<div class="col-lg-1">
+					<mat-form-field appearance="outline" class="w-100" style="width: 125%;">
+						<mat-label>Cantidad</mat-label>
+						<input [disabled]="soloLectura" matInput type="number" min="0"
+							[(ngModel)]="item.remaining"
+							[ngModelOptions]="{ standalone: true }" name="qty_{{i}}" />
+					</mat-form-field>
+				</div>
+
+				<!-- Recibidos -->
+				<div class="col-lg-1"
+					*ngIf="item.cantidad_validada != null && action === 'View'">
+					<mat-form-field appearance="outline" class="w-100" style="width: 125%;">
+						<mat-label>Recibidos</mat-label>
+						<input [disabled]="soloLectura" matInput type="text"
+							[(ngModel)]="item.cantidad_validada"
+							[ngModelOptions]="{ standalone: true }" />
+					</mat-form-field>
+				</div>
+
+				<!-- Nº Lote -->
+				<div class="col-lg-1">
+					<mat-form-field appearance="outline" floatLabel="always" class="w-100"
+						style="width: 125%;">
+						<mat-label>Nº Lote</mat-label>
+
+						<input
+							matInput
+							type="text"
+							[disabled]="soloLectura"
+							[matAutocomplete]="autoLote"
+							[(ngModel)]="item.lote_number"
+							[ngModelOptions]="{ standalone: true }"
+							name="lote_{{i}}"
+							(ngModelChange)="onLoteInput($event, i)"
+							placeholder="Nº lote" />
+
+						<mat-autocomplete
+							#autoLote="matAutocomplete"
+							(optionSelected)="onLoteSelected($event.option.value, i)">
+							<mat-option *ngFor="let l of (filteredLotes[i] || [])" [value]="l">
+								<div class="d-flex justify-content-between w-100">
+									<span>{{ l.lote_number }}</span>
+								</div>
+							</mat-option>
+						</mat-autocomplete>
+					</mat-form-field>
+				</div>
+
+				<!-- Caducidad -->
+				<div class="col-lg-2">
+					<mat-form-field appearance="outline" class="w-100">
+						<mat-label>Caducidad</mat-label>
+						<input matInput [disabled]="soloLectura" [matDatepicker]="picker"
+							[(ngModel)]="item.expiration_date"
+							[ngModelOptions]="{ standalone: true }"
+							placeholder="Escoge una fecha" />
+						<mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+						<mat-datepicker #picker></mat-datepicker>
+					</mat-form-field>
+				</div>
+
+				<!-- Eliminar lote -->
+				<div class="col-lg-1 d-flex align-items-center" style="height: 35px;">
+					<button *ngIf="!soloLectura" color="warn" (click)="removeItem(i)">
+						<i-tabler name="trash"></i-tabler>
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- solo en Update -->
+		<div class="row mb-3" *ngIf="action != 'View'">
+			<div class="col-12" style="margin-bottom: 1.5em;">
+				<button mat-stroked-button color="primary" (click)="addItem()"
+					type="button">
+					+ Linea
+				</button>
+			</div>
+		</div>
+
+		<!-- Observaciones -->
+		<div class="row">
+			<div class="col-12">
+				<mat-form-field appearance="outline" class="w-100">
+					<mat-label>Observaciones</mat-label>
+					<textarea [disabled]="soloLectura" matInput
+						[(ngModel)]="local_data.observations"
+						[ngModelOptions]="{ standalone: true }" name="observations"
+						placeholder="Notas del pedido"></textarea>
+				</mat-form-field>
+			</div>
+		</div>
+
+		<!-- Botones -->
+		<div mat-dialog-actions class="d-flex justify-content-end gap-2"
+			style="margin-top:12px;">
+			<button mat-flat-button class="bg-error text-white"
+				(click)="closeDialog()">Cancelar</button>
+			<button *ngIf="action==='Add' || action==='Update'" mat-flat-button
+				color="primary" (click)="doAction()">
+				Confirmar
+			</button>
+		</div>
+	</form>
+</mat-dialog-content>
+
+<!-- ======================================================== -->
+<!-- CONFIRMACIÓN DE BORRADO -->
+<!-- ======================================================== -->
+<div *ngIf="action === 'Delete'">
+	<div class="p-x-24 m-y-8">
+		<p class="f-s-14">
+			¿Seguro que deseas eliminar <span class="f-w-600">{{ local_data.lote_number
+				}}</span>?
+		</p>
+	</div>
+	<div mat-dialog-actions class="p-x-24 p-b-24">
+		<button mat-flat-button class="bg-error text-white"
+			(click)="closeDialog()">Cancelar</button>
+		<button (click)="doAction()" mat-flat-button>{{ action }}</button>
+	</div>
+</div>
+
+<!-- ======================================================== -->
+<!-- VALIDAR STOCK -->
+<!-- ======================================================== -->
+<div *ngIf="action === 'Validar'"
+	style="padding:20px 30px; max-width:1200px; margin:0 auto;">
+
+	<!-- Título -->
+	<h5 style="font-size:14px; font-weight:600; margin-bottom:16px;">
+		Validación de Stock
+	</h5>
+
+	<!-- Iteración de productos -->
+	<div class="row align-items-center"
+		*ngFor="let ln of returnLines; let i = index" style="margin-bottom:12px;">
+
+		<!-- Imagen -->
+		<div class="col-lg-1 d-flex justify-content-end">
+			<img *ngIf="ln.image" [src]="ln.image"
+				alt="Imagen {{ getProductLabel(ln.product_sku) }}" width="37"
+				height="37" style="border-radius:4px;" />
+		</div>
+
+		<!-- Producto -->
+		<div class="col-lg-2" style="font-size:12px;">
+			<mat-label>{{ln.product_name}}</mat-label>
+		</div>
+
+		<!-- Variante -->
+		<div class="col-lg-2" style="font-size:12px;">
+			<mat-label>{{ln.variant_name || '-'}}</mat-label>
+		</div>
+
+		<!-- Nº Lote -->
+		<div class="col-lg-2">
+			<label
+				style="font-size:10px; font-weight:600; margin-bottom:2px; display:block;">
+				Nº Lote
+			</label>
+			<div
+				style="font-size:14px; padding:6px 10px; border:1px solid #ccc; border-radius:4px; background:#fafafa;">
+				{{ ln.lote_number || '—' }}
+			</div>
+		</div>
+
+		<!-- Albaran -->
+		<div class="col-lg-2">
+			<label
+				style="font-size:10px; font-weight:600; margin-bottom:2px; display:block;">
+				Albarán
+			</label>
+			<div
+				style="font-size:14px; padding:6px 10px; border:1px solid #ccc; border-radius:4px; background:#fafafa;">
+				{{ ln.qtyOrdered }}
+			</div>
+		</div>
+
+		<div class="col-lg-2">
+			<label
+				style="font-size:10px; font-weight:600; margin-bottom:2px; display:block;">
+				Recibidos
+			</label>
+			<mat-form-field appearance="outline" class="w-100"
+				style="font-size:12px; height:40px;">
+				<input matInput type="number" [(ngModel)]="ln.qtyReturn"
+					style="font-size:14px; height:28px; padding:2px 6px;" />
+			</mat-form-field>
+		</div>
+	</div>
+
+	<!-- Total -->
+	<div class="row" style="margin-top:26px; font-size:16px;">
+		<div class="col-12 text-end">
+			<strong>Revisados y confirmados:</strong> {{ totalADevolver() }}
+		</div>
+	</div>
+
+	<!-- Botones -->
+	<div mat-dialog-actions class="d-flex justify-content-end gap-2"
+		style="margin-top:12px; padding-top:16px; border-top:1px solid #ddd;">
+		<button mat-flat-button class="bg-error text-white"
+			(click)="closeDialog()">Cancelar</button>
+		<button mat-flat-button color="primary"
+			(click)="confirmarDevolucion(dialogRef)">
+			Validar
+		</button>
+	</div>
+</div>

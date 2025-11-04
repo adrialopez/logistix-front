@@ -1,0 +1,403 @@
+<div class="d-flex align-items-center justify-content-between m-b-8 p-x-20 p-t-16">
+  <h3>{{ getActionKey() | translate }} {{ 'pedido' | translate }}</h3>
+
+  <div class="d-flex align-items-center" style="gap:.5rem;">
+    <!-- Botón Descargar Albarán -->
+    @if(action === 'View' || action === 'Update') {
+      <button mat-flat-button color="accent" (click)="downloadAlbaran()">
+        {{ 'descargar_albaran' | translate : ({default:'Descargar Albarán'}) }}
+      </button>
+    }
+
+    <!-- Botón Marcar como devuelto -->
+    @if(action === 'View' || action === 'Update') {
+    <ng-container *ngIf="!local_data?.es_devuelto; else yaDevuelto">
+      <button mat-flat-button color="primary" (click)="openReturnDialog()">
+        {{ 'marcar_como_devuelto' | translate :
+        ({default:'Marcar como devuelto'}) }}
+      </button>
+    </ng-container>
+
+    <ng-template #yaDevuelto>
+      <mat-label style="color: red;">
+        {{ 'pedido_ya_devuelto' | translate : ({default:'Pedido ya devuelto'})
+        }}
+      </mat-label>
+    </ng-template>
+    }
+    <!-- Botón cerrar existente -->
+    <button mat-icon-button mat-dialog-close class="d-flex justify-content-center">
+      <i-tabler name="x" class="icon-20 d-flex"></i-tabler>
+    </button>
+  </div>
+</div>
+
+@if(action !== 'Delete') {
+<mat-dialog-content>
+  <form #pedidoForm="ngForm" class="container-fluid">
+    <div class="row">
+      <div [ngClass]="action !== 'Add' ? 'col-lg-9' : 'col-lg-12'">
+        <div class="row mb-3">
+          <div class="col-lg-4">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>{{ 'numero_pedido' | translate }}</mat-label>
+              <input [disabled]="isView" matInput required name="order_number" [(ngModel)]="local_data.order_number"
+                [placeholder]="'numero_pedido_ph' | translate" />
+            </mat-form-field>
+          </div>
+          <div class="col-lg-4">
+            <mat-checkbox [disabled]="isView" [(ngModel)]="local_data.b2b" name="b2b" color="primary">
+              {{ 'pedido_b2b' | translate }}
+            </mat-checkbox>
+          </div>
+          <div class="col-lg-4">
+            <mat-checkbox [disabled]="isView" [(ngModel)]="local_data.requiere_retorno" name="requiere_retorno"
+              color="primary">
+              {{ 'requiere_retorno' | translate }}
+            </mat-checkbox>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-lg-4">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>{{ 'cliente' | translate }}</mat-label>
+              <input [disabled]="isView" matInput name="customer_name" [(ngModel)]="local_data.customer_name"
+                [placeholder]="'nombre_cliente' | translate" />
+            </mat-form-field>
+          </div>
+          <div class="col-lg-4">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>{{ 'email_cliente' | translate }}</mat-label>
+              <input [disabled]="isView" matInput type="email" required name="customer_email"
+                [(ngModel)]="local_data.customer_email" [placeholder]="'email' | translate" />
+
+              <mat-error *ngIf="
+      pedidoForm.controls['customer_email']?.invalid &&
+      (pedidoForm.controls['customer_email']?.dirty || pedidoForm.controls['customer_email']?.touched)
+    ">
+                <ng-container *ngIf="pedidoForm.controls['customer_email']?.errors?.['required']">
+                  {{ 'campo_requerido' | translate : ({default:'Campo requerido'}) }}
+                </ng-container>
+                <ng-container *ngIf="pedidoForm.controls['customer_email']?.errors?.['email']">
+                  {{ 'email_invalido' | translate : ({default:'Email inválido'}) }}
+                </ng-container>
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="col-lg-4">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>{{ 'telefono_cliente' | translate }}</mat-label>
+              <input [disabled]="isView" matInput required name="customer_phone" [(ngModel)]="local_data.customer_phone"
+                [placeholder]="'telefono' | translate" pattern="^[0-9+\-\s()]{7,20}$" />
+
+              <mat-error *ngIf="
+      pedidoForm.controls['customer_phone']?.invalid &&
+      (pedidoForm.controls['customer_phone']?.dirty || pedidoForm.controls['customer_phone']?.touched)
+    ">
+                <ng-container *ngIf="pedidoForm.controls['customer_phone']?.errors?.['required']">
+                  {{ 'campo_requerido' | translate : ({default:'Campo requerido'}) }}
+                </ng-container>
+                <ng-container *ngIf="pedidoForm.controls['customer_phone']?.errors?.['pattern']">
+                  {{ 'telefono_invalido' | translate : ({default:'Teléfono inválido'}) }}
+                </ng-container>
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-lg-4">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>{{ 'pais' | translate }}</mat-label>
+
+              <mat-select [(ngModel)]="local_data.country" name="country" [disabled]="isView" required>
+
+                <!-- cómo se ve la opción seleccionada -->
+                <mat-select-trigger>
+                  <span [class]="'flag-icon flag-icon-' + (local_data.country || '').toLowerCase()"
+                    style="margin-right: 8px;">
+                  </span>
+                  {{ getCountryName(local_data.country) || local_data.country }}
+                </mat-select-trigger>
+
+                <!-- listado -->
+                <mat-option *ngFor="let c of countries" [value]="c.code">
+                  <span [class]="'flag-icon flag-icon-' + c.code.toLowerCase()" style="margin-right: 8px;">
+                  </span>
+                  {{ c.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-lg-4">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>{{ 'codigo_postal' | translate }}</mat-label>
+              <input [disabled]="isView" matInput name="postal_code" [(ngModel)]="local_data.postal_code"
+                [placeholder]="'cp' | translate" />
+            </mat-form-field>
+          </div>
+          <div class="col-lg-4">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>{{ 'ciudad' | translate }}</mat-label>
+              <input [disabled]="isView" matInput name="city" [(ngModel)]="local_data.city"
+                [placeholder]="'ciudad' | translate" />
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-lg-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>{{ 'direccion_1' | translate }}</mat-label>
+              <input [disabled]="isView" matInput name="shipping_address1" [(ngModel)]="local_data.shipping_address1"
+                [placeholder]="'direccion' | translate" />
+            </mat-form-field>
+          </div>
+          <div class="col-lg-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>{{ 'direccion_2' | translate }}</mat-label>
+              <input [disabled]="isView" matInput name="shipping_address2" [(ngModel)]="local_data.shipping_address2"
+                [placeholder]="'complemento' | translate" />
+            </mat-form-field>
+          </div>
+        </div>
+
+        @if (action !== 'Add' && action !== 'Update') {
+        <h5 class="mb-2" style="margin-bottom: 1em;">{{ 'envio' | translate
+          }}</h5>
+        <div class="row mb-3">
+          <div class="col-lg-4">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>{{ 'carrier' | translate }}</mat-label>
+              <mat-select [disabled]="role !== 'admin' || isView ? true : false" name="carrier"
+                [(ngModel)]="local_data.carrier" required>
+                <mat-option *ngFor="let c of carriersOptions" [value]="c.value">
+                  {{ c.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-4">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>{{ 'metodo_envio' | translate }}</mat-label>
+              <mat-select [disabled]="role !== 'admin' || isView ? true : false" name="sm_id"
+                [(ngModel)]="local_data.sm_id" required>
+                <mat-option *ngFor="let m of smethodsOptions" [value]="m.value">
+                  {{ m.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-lg-4">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>{{ 'tracking' | translate }}</mat-label>
+              <input [disabled]="isView" matInput name="tracking_number" [(ngModel)]="local_data.tracking_number"
+                [placeholder]="'numero_seguimiento' | translate" readonly />
+            </mat-form-field>
+          </div>
+
+        </div>
+        }
+        <h5 class="mb-2" style="margin-bottom: 1em;">{{ 'productos' | translate
+          }}</h5>
+        <div class="row mb-2" style="align-items: flex-start;"
+          *ngFor="let item of local_data.order_items || []; let i = index">
+          <div class="col-lg-1 d-flex align-items-center justify-content-end px-0">
+            <img *ngIf="item.product_image" [src]="item.product_image" [alt]="'imagen' | translate" width="37"
+              height="37" style="border-radius:4px; height: 37px;" />
+          </div>
+          <div class="col-lg-2">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>{{ 'producto' | translate }}</mat-label>
+              <input type="text" matInput [disabled]="isView" [matAutocomplete]="autoProducto"
+                [(ngModel)]="item.product_label" name="product_{{i}}" (ngModelChange)="filterProductos($event, i)"
+                [placeholder]="'producto' | translate" style="font-size: 12px;" required />
+              <mat-autocomplete autoActiveFirstOption #autoProducto="matAutocomplete"
+                (optionSelected)="onProductoSelected($event.option.value, i)">
+                <mat-option *ngFor="let p of (filteredProductos[i] || [])" [value]="p">
+                  {{ p.label }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+
+          <!-- VARIANTE -->
+          <div class="col-lg-2">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>{{ 'variante' | translate }}</mat-label>
+              <input type="text" matInput [disabled]="isView" [matAutocomplete]="autoVar"
+                [(ngModel)]="item.variant_label" name="variant_{{i}}" (ngModelChange)="filterVariantes($event || '', i)"
+                [placeholder]="'variante' | translate" style="font-size: 12px;" required />
+
+              <mat-autocomplete #autoVar="matAutocomplete">
+                <mat-option *ngFor="let v of (filteredVariantes[i] || [])" [value]="v.label"
+                  (onSelectionChange)="onVarOptionSelected($event, v, i)">
+                  <div class="d-flex flex-column">
+                    <span>{{ v.label }}</span>
+                  </div>
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+
+          <!-- LOTE (Add - editable) -->
+          <div class="col-lg-2" *ngIf="action === 'Add'">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Lote (opcional)</mat-label>
+              <input type="text" matInput [disabled]="isView" [matAutocomplete]="autoLote"
+                [(ngModel)]="item.lote_number" name="lote_{{i}}" (ngModelChange)="onLoteInput($event, i)"
+                placeholder="Seleccionar lote" style="font-size: 12px;" />
+
+              <mat-autocomplete #autoLote="matAutocomplete"
+                (optionSelected)="onLoteSelected($event.option.value, i)">
+                <mat-option *ngFor="let l of (filteredLotes[i] || [])" [value]="l">
+                  <div class="d-flex justify-content-between w-100">
+                    <span>{{ l.lote_number }}</span>
+                    <span style="color: #666; font-size: 0.85em;">(Stock: {{ l.remaining }})</span>
+                  </div>
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+
+          <!-- LOTE (View/Update - solo lectura) -->
+          <div class="col-lg-2" *ngIf="action !== 'Add'">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Lote</mat-label>
+              <input matInput [value]="item.lote_number || '—'" readonly style="font-size: 12px;" />
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-2">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Cant. (Max. {{ getMaxQty(i) }})</mat-label>
+
+              <input #qtyRef="ngModel" matInput type="number" [disabled]="isView" [(ngModel)]="item.quantity"
+                name="qty_{{i}}" required [min]="0" [max]="getMaxQty(i)" (input)="enforceMax($event, i)"
+                style="font-size: 12px;" />
+
+              <!-- Error si (por cualquier motivo) quedara fuera de rango -->
+              <mat-error *ngIf="qtyRef.invalid && (qtyRef.dirty || qtyRef.touched)">
+                <ng-container *ngIf="qtyRef.errors?.['max']">
+                  {{ 'cantidad_supera_stock' | translate :
+                  ({default:'La cantidad supera el stock disponible'}) }}
+                </ng-container>
+                <ng-container *ngIf="qtyRef.errors?.['min']">
+                  {{ 'cantidad_minima' | translate :
+                  ({default:'La cantidad no puede ser negativa'}) }}
+                </ng-container>
+                <ng-container *ngIf="qtyRef.errors?.['required']">
+                  {{ 'campo_requerido' | translate :
+                  ({default:'Campo requerido'}) }}
+                </ng-container>
+              </mat-error>
+            </mat-form-field>
+
+          </div>
+          <div class="col-lg-2">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Precio unitario</mat-label>
+              <input [disabled]="isView" matInput type="number" [(ngModel)]="item.price" name="price_{{i}}"
+                style="font-size: 12px;" required />
+            </mat-form-field>
+          </div>
+          <div *ngIf="!isView" class="col-lg-1 d-flex align-items-center">
+            <button mat-stroked-button color="error" (click)="removeItem(i)">
+              {{ 'eliminar' | translate }}
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="!isView" class="row mb-3" style="margin-bottom: 1em;">
+          <div class="col-12">
+            <button mat-stroked-button color="primary" (click)="addItem()" type="button">
+              {{ 'add_producto' | translate }}
+            </button>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>{{ 'observaciones_client' | translate }}</mat-label>
+              <textarea [disabled]="isView" matInput [(ngModel)]="local_data.observations" name="observations"
+                [placeholder]="'notas_pedido' | translate"></textarea>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>{{ 'notas_internas' | translate }}</mat-label>
+              <textarea [disabled]="isView" matInput [(ngModel)]="local_data.notas_internas" name="notas_internas"
+                [placeholder]="'notas_internas' | translate"></textarea>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row" *ngIf="local_data.motivo_devolucion">
+          <div class="col-12">
+            <mat-form-field appearance="outline" class="w-100" disabled>
+              <mat-label>{{ 'motivo_devolucion' | translate }}</mat-label>
+              <textarea matInput [value]="local_data.motivo_devolucion" readonly></textarea>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+      @if (action !== 'Add') {
+      <div class="col-lg-3">
+        <mat-card class="cardWithShadow">
+          <mat-card-content>
+            <mat-card-title>{{ 'historial_estados' | translate
+              }}</mat-card-title>
+            <div class="timeline m-t-24" *ngIf="statusHistory?.length">
+              <div class="timeline-item d-flex overflow-hidden" *ngFor="let stat of statusHistory">
+                <div class="time text-center f-s-10"><span>{{ stat.created_at |
+                    date:'HH:mm' }}</span> <br> <span>{{ stat.created_at |
+                    date:'dd/MM/yyyy' }}</span> </div>
+                <div class="point d-flex align-items-center">
+                  <span class="timeline-badge" [ngClass]="'border-' + colorFor(stat.status)"></span>
+                  <span class="timline-border d-block"></span>
+                </div>
+                <div class="desc">
+                  <span class="f-s-12 lh-20 f-w-600 d-block">{{ stat.status
+                    }}</span>
+                </div>
+              </div>
+            </div>
+
+          </mat-card-content>
+        </mat-card>
+      </div>
+      }
+    </div>
+  </form>
+
+</mat-dialog-content>
+<mat-dialog-actions *ngIf="!isView" align="end" class="dialog-actions-sticky">
+  <button mat-flat-button class="bg-error text-white" (click)="closeDialog()">
+    {{ 'cancelar' | translate }}
+  </button>
+  <button mat-flat-button color="primary" (click)="doAction()" [disabled]="!pedidoForm.valid">
+    {{ getActionKey() | translate }}
+  </button>
+</mat-dialog-actions>
+}
+
+@else {
+<div class="p-x-24 m-y-8">
+  <p class="f-s-14">
+    {{ 'seguro_eliminar_pedido' | translate }} <span class="f-w-600">{{local_data.order_number}}</span>?
+  </p>
+</div>
+<div mat-dialog-actions class="p-x-24 p-b-24">
+  <button mat-flat-button (click)="closeDialog()" class="m-l-8 bg-error text-white">
+    {{ 'cancelar' | translate }}
+  </button>
+  <button (click)="doAction()" mat-flat-button>{{ getActionKey() | translate
+    }}</button>
+</div>
+}

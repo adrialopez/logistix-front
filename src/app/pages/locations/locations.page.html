@@ -1,0 +1,122 @@
+<ion-content [fullscreen]="true">
+
+  <div class="contenedor">
+    <div class="contenido">
+      <mat-card class="cardWithShadow" style="margin-bottom: 16px !important;">
+        <mat-card-content style="padding-top: 16px !important; padding-bottom: 16px !important;">
+          <div class="row justify-content-start">
+              <div class="col-lg-9">
+                <mat-form-field appearance="outline" class="w-100 hide-hint">
+                  <mat-label>{{ 'buscar' | translate }}</mat-label>
+                  <input matInput [placeholder]="'buscar_placeholder' | translate"
+                  (keyup)="applyFilter($any($event.target).value)" />
+                  <mat-icon matSuffix>
+                    <i-tabler name="search" class="icon-20 d-flex m-t-2"></i-tabler>
+                  </mat-icon>
+                </mat-form-field>
+              </div>
+              <div class="col-lg-3">
+                <mat-checkbox [(ngModel)]="showDeleted" (change)="cargarLocations()" color="primary">
+                  {{ 'mostrar_lotes_inactivos' | translate }}
+                </mat-checkbox>
+              </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <div class="row">
+        <div class="main-panel col-12 col-lg-12">
+          <div class="b-1 rounded">
+            @if(selection.selected.length === 0 ){
+            <div class="justify-content-between gap-16 d-flex align-items-center b-b-1" style="height: 71px;">
+              <div class="col-sm-4" style="margin-left: 29px !important;">
+                <h5>{{ 'almacenes' | translate }}</h5>
+              </div>
+              <div class="col-sm-6 d-flex align-items-center justify-content-end ">
+                <button mat-flat-button (click)="openDialog('Add', {}, shop)" color="primary"
+                  style="margin-right: 15px !important;">
+                  {{ 'alta_almacen' | translate }}
+                </button>
+              </div>
+            </div>
+            }
+            @if(selection.selected.length > 0){
+            <div class="justify-content-between gap-16 d-flex align-items-center b-b-1" style="height: 71px;">
+              <div class="col-sm-4" style="margin-left: 29px !important;">
+                <h5>{{ 'lotes_y_caducidades' | translate }}</h5>
+              </div>
+              <button mat-icon-button color="warn" style="margin-right: 29px !important;" (click)="deleteSelected()">
+                <tabler-icon name="trash"></tabler-icon>
+              </button>
+            </div>
+            }
+            <table #table mat-table matSort [dataSource]="dataSource" class="w-100">
+              
+             <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef class="p-l-0 ">
+                  <mat-checkbox (change)="$event ? masterToggle() : null"
+                    [checked]="selection.hasValue() && isAllSelected()" color="primary"
+                    [indeterminate]="selection.hasValue() && !isAllSelected()" [aria-label]="checkboxLabel()"
+                    class="m-l-16">
+                  </mat-checkbox>
+                </th>
+                <td mat-cell *matCellDef="let row" class="p-l-0">
+                  <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
+                    color="primary" [checked]="selection.isSelected(row)" [aria-label]="checkboxLabel(row)"
+                    class="m-l-16">
+                  </mat-checkbox>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="code">
+                <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+                  {{ 'codigo' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.code }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+                  {{ 'nombre' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.name }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+                  {{ 'acciones' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let element" class="action-link">
+                  <a
+                    (click)="openDialog('Update', element, shop)"
+                    class="m-r-10 cursor-pointer">
+                    <i-tabler name="edit" class="icon-18"></i-tabler>
+                  </a>
+                  <a
+                    (click)="openDialog('Delete', element, shop)"
+                    class="cursor-pointer"
+                    style="margin-left:1em;">
+                    <i-tabler name="trash" class="icon-18"></i-tabler>
+                  </a>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+            <mat-paginator class="b-t-1" style="border-radius: 0px 0px 10px 10px !important"
+              [pageSizeOptions]="[5,10,20]"
+              [pageSize]="locationsPorPagina"
+              showFirstLastButtons></mat-paginator>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</ion-content>

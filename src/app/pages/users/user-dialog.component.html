@@ -1,0 +1,77 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>{{ action === 'Add' ? 'Nuevo Usuario' : 'Editar Usuario' }}</h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="userForm" class="dialog-form">
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email" placeholder="usuario@ejemplo.com">
+          <mat-icon matPrefix>mail</mat-icon>
+          <mat-error *ngIf="userForm.get('email')?.hasError('required')">
+            El email es obligatorio
+          </mat-error>
+          <mat-error *ngIf="userForm.get('email')?.hasError('email')">
+            Email inválido
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Contraseña</mat-label>
+          <input matInput formControlName="password" type="password"
+                 [placeholder]="action === 'Update' ? 'Dejar vacío para no cambiar' : 'Mínimo 6 caracteres'">
+          <mat-icon matPrefix>lock</mat-icon>
+          <mat-error *ngIf="userForm.get('password')?.hasError('required')">
+            La contraseña es obligatoria
+          </mat-error>
+          <mat-error *ngIf="userForm.get('password')?.hasError('minlength')">
+            Mínimo 6 caracteres
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Tienda</mat-label>
+          <mat-select formControlName="tienda_id">
+            <mat-option *ngFor="let tienda of tiendas" [value]="tienda.id">
+              {{ tienda.nombre || tienda.dominio_shopify || tienda.id }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>store</mat-icon>
+          <mat-error *ngIf="userForm.get('tienda_id')?.hasError('required')">
+            Debes seleccionar una tienda
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Rol</mat-label>
+          <mat-select formControlName="role">
+            <mat-option *ngFor="let role of roles" [value]="role.value">
+              {{ role.label }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-error *ngIf="userForm.get('role')?.hasError('required')">
+            Debes seleccionar un rol
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="closeDialog()" type="button">
+      <mat-icon>cancel</mat-icon>
+      Cancelar
+    </button>
+    <button mat-raised-button color="primary" (click)="doAction()" [disabled]="userForm.invalid">
+      <mat-icon>{{ action === 'Add' ? 'add' : 'save' }}</mat-icon>
+      {{ action === 'Add' ? 'Crear' : 'Actualizar' }}
+    </button>
+  </mat-dialog-actions>
+</div>

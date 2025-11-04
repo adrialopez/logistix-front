@@ -1,0 +1,210 @@
+<ion-content [fullscreen]="true">
+  <div class="contenedor">
+    <div class="contenido">
+
+      <mat-card class="cardWithShadow" style="margin-bottom: 16px !important;">
+        <mat-card-content
+          style="padding-top: 16px !important; padding-bottom: 16px !important;">
+          <div class="row justify-content-between">
+            <div class="col-lg-3">
+              <mat-form-field appearance="outline" class="w-100 hide-hint">
+                <mat-label> Nº {{ 'lote' | translate }}</mat-label>
+                <input matInput [formControl]="orderNumberCtrl"
+                  placeholder="{{ 'selecciona_lote' | translate }}">
+              </mat-form-field>
+            </div>
+            <div class="col-lg-3" style="display: flex; align-items: center;">
+              <mat-checkbox [(ngModel)]="mostrarSoloPedidos" (change)="onMostrarPedidosChange()" color="primary">
+                {{ 'mostrar_solo_pedidos' | translate : ({default:'Mostrar solo pedidos'}) }}
+              </mat-checkbox>
+            </div>
+            <div class="col-lg-3"></div>
+            <div class="col-lg-3"
+              style="display: flex; justify-content: flex-end;">
+              <button mat-flat-button
+                color="primary"
+                (click)="exportToExcel()"
+                [disabled]="!orderNumberCtrl.value?.trim()">
+                {{ 'exportar_excel' | translate }}
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <div class="row">
+        <div class="main-panel col-12 col-lg-12">
+          <div class="b-1 rounded">
+            @if(selection.selected.length === 0 ){
+            <div
+              class="justify-content-between gap-16 d-flex align-items-center b-b-1"
+              style="height: 71px;">
+              <div class="col-sm-4" style="margin-left: 29px !important;">
+                <h5>{{ 'movimientos' | translate }}</h5>
+              </div>
+              <div
+                class="col-sm-6 d-flex align-items-center justify-content-end ">
+                <!--<button mat-flat-button
+                  (click)="openDialog('Add', {}, productoOptions, varianteOptions, locationOptions, shop)"
+                  color="primary" style="margin-right: 15px !important;">
+                  {{ 'alta_lote' | translate }}
+                </button>-->
+              </div>
+            </div>
+            }
+            @if(selection.selected.length > 0){
+            <div
+              class="justify-content-between gap-16 d-flex align-items-center b-b-1"
+              style="height: 71px;">
+              <div class="col-sm-4" style="margin-left: 29px !important;">
+                <h5>{{ 'movimientos' | translate }}</h5>
+              </div>
+              <button mat-icon-button color="warn"
+                style="margin-right: 29px !important;">
+                <tabler-icon name="trash"></tabler-icon>
+              </button>
+            </div>
+            }
+            <table #table mat-table matSort [dataSource]="dataSource"
+              class="w-100">
+
+              <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef class="p-l-0 ">
+                  <mat-checkbox (change)="$event ? masterToggle() : null"
+                    [checked]="selection.hasValue() && isAllSelected()"
+                    color="primary"
+                    [indeterminate]="selection.hasValue() && !isAllSelected()"
+                    [aria-label]="checkboxLabel()"
+                    class="m-l-16">
+                  </mat-checkbox>
+                </th>
+                <td mat-cell *matCellDef="let row" class="p-l-0">
+                  <mat-checkbox (click)="$event.stopPropagation()"
+                    (change)="$event ? selection.toggle(row) : null"
+                    color="primary" [checked]="selection.isSelected(row)"
+                    [aria-label]="checkboxLabel(row)"
+                    class="m-l-16">
+                  </mat-checkbox>
+                </td>
+              </ng-container>
+              <!-- LOTE -->
+              <ng-container matColumnDef="lote_id">
+                <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+                  #
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.lote_id }}
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="lote_number">
+                <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+                  Nº {{ 'lote' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.lote_number }}
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="producto">
+                <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+                  {{ 'producto' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  <div class="d-flex align-items-center gap-16">
+                    <img class="rounded-circle" [src]="element.product_image"
+                      width="45" />
+                    <div>
+                      <h6 class="f-w-600 f-s-16 m-t-0">
+                        {{ element.product_name }}
+                      </h6>
+                      <span class="f-s-14">
+                        {{ element.variant_name || '-' }}
+                      </span>
+                    </div>
+                  </div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="cantidad">
+                <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+                  {{ 'cantidad' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  <ng-container *ngIf="element.cantidad === 0">
+                    0
+                  </ng-container>
+                  <ng-container *ngIf="element.cantidad !== 0">
+                    {{ element.tipo === 'entrada' ? '+' : (element.tipo ===
+                    'salida' ? '-' : '') }}{{ element.cantidad }}
+                  </ng-container>
+                </td>
+              </ng-container>
+
+              <!-- RESTANTE -->
+              <ng-container matColumnDef="motivo">
+                <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+                  {{ 'motivo' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let element" class="f-s-14">
+                  {{ element.motivo ? element.motivo : '-'}}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="fecha">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header
+                  class="f-s-16 f-w-600">
+                  {{ 'fecha' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let element" class="f-s-14">
+                  {{ element.fecha ? (element.fecha |
+                  date:'dd/MM/yyyy HH:mm:ss') : '-' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="origen">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header
+                  class="f-s-16 f-w-600">
+                  {{ 'origen' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let element" class="f-s-14">
+                  {{ element.origen ? element.origen : '-'}}
+                </td>
+              </ng-container>
+
+              <!-- ACCIONES -->
+              <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">
+                  {{ 'accion' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let element" class="action-link">
+                  <a
+                    (click)="openDialog('Update', element, productoOptions, varianteOptions, locationOptions, shop)"
+                    class="m-r-10 cursor-pointer">
+                    <i-tabler name="edit" class="icon-18"></i-tabler>
+                  </a>
+                  <a
+                    (click)="openDialog('Delete', element, productoOptions, varianteOptions, locationOptions, shop)"
+                    class="cursor-pointer" style="margin-left:1em;">
+                    <i-tabler name="trash" class="icon-18"></i-tabler>
+                  </a>
+                </td>
+              </ng-container>
+
+              <!-- Filas -->
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            </table>
+
+            <mat-paginator class="b-t-1"
+              style="border-radius: 0px 0px 10px 10px !important"
+              [pageSizeOptions]="[5,10,20]" [pageSize]="movimientosPorPagina"
+              [length]="totalRegistros"
+              [pageIndex]="paginaActual" showFirstLastButtons>
+            </mat-paginator>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</ion-content>

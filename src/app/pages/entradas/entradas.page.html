@@ -1,0 +1,380 @@
+<ion-content [fullscreen]="true">
+  <div class="contenedor">
+    <div class="contenido" [ngClass]="{'sin-padding': compact}">
+      <div class="topcard-grid row"
+        style="display:flex; justify-content: center;">
+        <div class="topcard-item col-sm-6 col-lg-3">
+          <mat-card class="text-center">
+            <mat-card-content>
+              <img
+                src="/assets/images/entradaProgramada.png"
+                alt="users"
+                width="70" />
+              <h4 class="f-s-14 f-w-600 text-primary m-t-8">
+                Entradas pendientes
+              </h4>
+              <h6 class="f-s-21 f-w-600 text-primary m-t-8">
+                {{resumen.pendientes}}
+              </h6>
+            </mat-card-content>
+          </mat-card>
+        </div>
+        <div class="topcard-item col-sm-6 col-lg-3">
+          <mat-card class="text-center">
+            <mat-card-content>
+              <img
+                src="/assets/images/newEntrada.png"
+                alt="users"
+                width="70" />
+              <h4 class="f-s-14 f-w-600 text-primary m-t-8">
+                Entradas procesadas
+              </h4>
+              <h6 class="f-s-21 f-w-600 text-primary m-t-8">
+                {{resumen.procesadas}}
+              </h6>
+            </mat-card-content>
+          </mat-card>
+        </div>
+        <div class="topcard-item col-sm-6 col-lg-3">
+          <mat-card class="text-center">
+            <mat-card-content>
+              <img
+                src="/assets/images/entradasRetrasadas.png"
+                alt="users"
+                width="70" />
+              <h4 class="f-s-14 f-w-600 text-primary m-t-8">
+                Entradas retrasadas
+              </h4>
+              <h6 class="f-s-21 f-w-600 text-primary m-t-8">
+                {{resumen.retrasadas}}
+              </h6>
+            </mat-card-content>
+          </mat-card>
+        </div>
+        <div class="topcard-item col-sm-6 col-lg-3">
+          <mat-card class="text-center">
+            <mat-card-content>
+              <img
+                src="/assets/images/entradasHoy.png"
+                alt="users"
+                width="70" />
+              <h4 class="f-s-14 f-w-600 text-primary m-t-8">
+                Entradas hoy
+              </h4>
+              <h6 class="f-s-21 f-w-600 text-primary m-t-8">
+                {{resumen.hoy_procesadas}}/{{resumen.hoy_pendientes}}
+              </h6>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+      </div>
+
+      <mat-card class="cardWithShadow" style="margin-bottom: 16px !important;"
+        *ngIf="!compact">
+        <mat-card-content
+          style="padding-top: 16px !important; padding-bottom: 16px !important;">
+          <div class="row justify-content-between">
+
+            <!-- Buscar (igual que antes) -->
+            <div class="col-lg-3">
+              <mat-form-field appearance="outline" class="w-100 hide-hint">
+                <mat-label>Buscar</mat-label>
+                <input matInput placeholder="Número, producto o variante..."
+                  (keyup)="applyFilter($any($event.target).value)" />
+                <mat-icon matSuffix>
+                  <i-tabler name="search"
+                    class="icon-20 d-flex m-t-2"></i-tabler>
+                </mat-icon>
+              </mat-form-field>
+            </div>
+
+            <!-- Producto (autocomplete) -->
+            <div class="col-lg-3">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Producto</mat-label>
+                <input
+                  type="text"
+                  matInput
+                  [(ngModel)]="productoInput"
+                  [matAutocomplete]="autoProducto"
+                  (ngModelChange)="noop()"
+                  placeholder="Selecciona el producto" />
+                <mat-autocomplete #autoProducto="matAutocomplete"
+                  (optionSelected)="onProductoSelected($event.option.value)">
+                  <mat-option *ngFor="let p of filteredProductos()"
+                    [value]="p.value">
+                    {{ p.label }}
+                  </mat-option>
+                </mat-autocomplete>
+                <button matSuffix mat-icon-button aria-label="Limpiar"
+                  *ngIf="productoInput" (click)="clearProducto()">
+                  <i-tabler name="x"></i-tabler>
+                </button>
+              </mat-form-field>
+            </div>
+
+            <!-- Variante (autocomplete) -->
+            <div class="col-lg-3">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Variante</mat-label>
+                <input
+                  type="text"
+                  matInput
+                  [(ngModel)]="varianteInput"
+                  [matAutocomplete]="autoVariante"
+                  (ngModelChange)="noop()"
+                  placeholder="Selecciona la variante" />
+                <mat-autocomplete #autoVariante="matAutocomplete"
+                  (optionSelected)="onVarianteSelected($event.option.value)">
+                  <mat-option *ngFor="let v of filteredVariantes()"
+                    [value]="v.value">
+                    {{ v.label }}
+                  </mat-option>
+                </mat-autocomplete>
+                <button matSuffix mat-icon-button aria-label="Limpiar"
+                  *ngIf="varianteInput" (click)="clearVariante()">
+                  <i-tabler name="x"></i-tabler>
+                </button>
+              </mat-form-field>
+            </div>
+
+            <!-- Almacén (autocomplete) -->
+            <div class="col-lg-3" *ngIf="locationOptions.length > 0">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Almacén</mat-label>
+                <input
+                  type="text"
+                  matInput
+                  [(ngModel)]="locationInput"
+                  [matAutocomplete]="autoLocation"
+                  (ngModelChange)="noop()"
+                  placeholder="Selecciona el almacén" />
+                <mat-autocomplete #autoLocation="matAutocomplete"
+                  (optionSelected)="onLocationSelected($event.option.value)">
+                  <mat-option *ngFor="let l of filteredLocations()"
+                    [value]="l.value">
+                    {{ l.label }}
+                  </mat-option>
+                </mat-autocomplete>
+                <button matSuffix mat-icon-button aria-label="Limpiar"
+                  *ngIf="locationInput" (click)="clearLocation()">
+                  <i-tabler name="x"></i-tabler>
+                </button>
+              </mat-form-field>
+            </div>
+
+            <!-- Mostrar inactivos -->
+            <div class="col-lg-3">
+              <mat-checkbox [(ngModel)]="showDeleted" (change)="onFilter()"
+                color="primary">
+                Mostrar Lotes Inactivos
+              </mat-checkbox>
+            </div>
+
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <div class="row">
+        <div class="main-panel col-12 col-lg-12">
+          <div class="b-1 rounded" [class.compact]="compact">
+            <!-- aplica estilos compact -->
+
+            <!-- Header si NO hay selección -->
+            <div *ngIf="selection.selected.length === 0"
+              class="justify-content-between gap-16 d-flex align-items-center b-b-1"
+              style="height: 71px;">
+              <div class="col-sm-4" style="margin-left: 29px !important;">
+                <ng-container *ngIf="!compact">
+                  <h5>Entradas</h5>
+                </ng-container>
+                <ng-container *ngIf="compact">
+                  <mat-form-field appearance="outline" class="hide-hint"
+                    style="min-width:320px; flex:1; max-width:500px;">
+                    <mat-label>Buscar</mat-label>
+                    <input matInput placeholder="Número, producto o variante..."
+                      (keyup)="applyFilter($any($event.target).value)" />
+                    <mat-icon matSuffix>
+                      <i-tabler name="search"
+                        class="icon-20 d-flex m-t-2"></i-tabler>
+                    </mat-icon>
+                  </mat-form-field>
+                </ng-container>
+              </div>
+              <div
+                class="col-sm-6 d-flex align-items-center justify-content-end">
+                <button *ngIf="!compact" mat-flat-button color="primary"
+                  (click)="openDialog('Add', null, productoOptions, varianteOptions, locationOptions)"
+                  style="margin-right: 15px !important;">
+                  Nueva Entrada
+                </button>
+                <button mat-flat-button *ngIf="compact" color="primary"
+                  class="d-flex justify-content-center align-items-center"
+                  [routerLink]="['/entradas']"
+                  style="margin-right: 15px !important;">
+                  Ir a Entradas
+                </button>
+              </div>
+            </div>
+
+            <!-- Header si HAY selección -->
+            <div *ngIf="selection.selected.length > 0"
+              class="justify-content-between gap-16 d-flex align-items-center b-b-1"
+              style="height: 71px;">
+              <div class="col-sm-4" style="margin-left: 29px !important;">
+                <h5>Entradas</h5>
+              </div>
+              <button mat-icon-button color="warn"
+                style="margin-right: 29px !important;"
+                (click)="deleteSelected()">
+                <tabler-icon name="trash"></tabler-icon>
+              </button>
+            </div>
+
+            <!-- Tabla de datos -->
+            <table #table mat-table matSort [dataSource]="dataSource"
+              class="w-100" [ngClass]="{'compact-table': compact}">
+              <!-- Checkbox -->
+              <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef class="p-l-0 ">
+                  <mat-checkbox (change)="$event ? masterToggle() : null"
+                    [checked]="selection.hasValue() && isAllSelected()"
+                    color="primary"
+                    [indeterminate]="selection.hasValue() && !isAllSelected()"
+                    [aria-label]="checkboxLabel()" class="m-l-16">
+                  </mat-checkbox>
+                </th>
+                <td mat-cell *matCellDef="let row" class="p-l-0">
+                  <mat-checkbox (click)="$event.stopPropagation()"
+                    (change)="$event ? selection.toggle(row) : null"
+                    color="primary" [checked]="selection.isSelected(row)"
+                    [aria-label]="checkboxLabel(row)" class="m-l-16">
+                  </mat-checkbox>
+                </td>
+              </ng-container>
+
+              <!-- Otras columnas -->
+              <ng-container matColumnDef="reference">
+                <th mat-header-cell *matHeaderCellDef class="f-s-13 f-w-600">Nº
+                  albarán</th>
+                <td mat-cell *matCellDef="let element">{{ element.reference
+                  }}</td>
+              </ng-container>
+
+              <ng-container *ngIf="canSeePrivileged()" matColumnDef="tienda_id">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header
+                  class="f-s-13 f-w-600">Cliente</th>
+                <td mat-cell *matCellDef="let element">{{ element.nombre || '-'
+                  }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="client_order_number">
+                <th mat-header-cell *matHeaderCellDef
+                  class="f-s-13 f-w-600">Proveedor</th>
+                <td mat-cell *matCellDef="let element">{{
+                  element.client_order_number}}</td>
+              </ng-container>
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef
+                  class="f-s-13 f-w-600">Estado</th>
+                <td mat-cell *matCellDef="let element">
+                  <span class="badge" [ngClass]="{
+			              'badge-pendiente': element.status === 'pendiente',
+			              'badge-aceptada': element.status === 'aceptada',
+						  'badge-parcial': element.status === 'parcial',
+						  'badge-rechazada': element.status === 'rechazada',
+			            }">
+                    {{ element.status | titlecase }}
+                  </span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="total_lines">
+                <th mat-header-cell *matHeaderCellDef
+                  class="f-s-13 f-w-600">Líneas</th>
+                <td mat-cell *matCellDef="let element">{{ element.total_lines
+                  }}</td>
+              </ng-container>
+
+              <!-- Validar Stock -->
+              <ng-container *ngIf="canSeePrivileged()"
+                matColumnDef="stock_validated">
+                <th mat-header-cell *matHeaderCellDef class="f-s-13 f-w-600">
+                  Validar Stock
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  <!-- SOLO botón cuando se marcó validar en almacén y aún no se ha validado -->
+                  <button
+                    *ngIf="element.require_warehouse_validation && !element.stock_validated"
+                    mat-stroked-button color="primary" type="button"
+                    (click)="openValidarDialog(element)">
+                    Validar
+                  </button>
+
+                  <!-- Badge 'Validado' cuando NO se requiere validar o ya está validado -->
+                  <span
+                    *ngIf="!element.require_warehouse_validation || element.stock_validated"
+                    class="badge badge-aceptada">
+                    Validado
+                  </span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="shipping_date">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header
+                  class="f-s-13 f-w-600">
+                  Llegada
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.shipping_date ? (element.shipping_date |
+                  date:'dd/MM/yyyy') : '—' }}
+                </td>
+              </ng-container>
+
+              <!-- Botones de acción -->
+              <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef
+                  class="f-s-13 f-w-600"></th>
+                <td mat-cell *matCellDef="let element" class="action-link">
+
+                  <div
+                    style="display: flex; gap: 10px;  justify-content: flex-end;">
+                    <button mat-stroked-button color="primary"
+                      (click)="openDialog('Update', element, productoOptions, varianteOptions, locationOptions)"
+                      *ngIf="!element.stock_validated">
+                      Editar
+                    </button>
+
+                    <button mat-flat-button color="primary"
+                      (click)="openDialog('View', element, productoOptions, varianteOptions, locationOptions)">
+                      Detalles
+                    </button>
+
+                    <button mat-stroked-button color="error"
+                      (click)="openDialog('Delete', element, productoOptions, varianteOptions, locationOptions)">
+                      Eliminar
+                    </button>
+                  </div>
+
+                </td>
+              </ng-container>
+
+              <!-- Filas -->
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            </table>
+
+            <!-- Paginador -->
+            <mat-paginator
+              class="b-t-1"
+              [pageSizeOptions]="[5,10,20]"
+              [pageSize]="lotesPorPagina"
+              [length]="totalEntradas"
+              showFirstLastButtons>
+            </mat-paginator>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,585 @@
+.contenedor {
+    display: flex;
+    justify-content: center;
+}
+
+.contenido {
+    width: 100%;
+    padding: 32px;
+}
+
+.carta {
+    margin-bottom: 1em;
+    width: 100%;
+}
+
+td {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.address-kv {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.02);
+    padding: 12px;
+}
+
+.kv-row {
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+    padding: 12px !important;
+}
+
+.kv-key {
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.72);
+}
+
+.kv-val {
+    color: rgba(0, 0, 0, 0.84);
+    word-break: break-word;
+}
+
+.order-items-card {
+    padding: 0;
+    overflow: hidden;
+
+    // NUEVO: que el card organice en columna para fijar cabeceras/controles arriba
+    display: flex;
+    flex-direction: column;
+    min-height: 0; // para que el hijo con overflow auto funcione
+}
+
+/* Top bar */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(0, 0, 0, .06);
+
+    .left {
+        .order-number {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .sub {
+            color: #6b7280;
+            font-size: 12px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .dot {
+            opacity: .6;
+        }
+    }
+}
+
+/* ===================== */
+/* NUEVO: Controles top  */
+/* ===================== */
+.controls-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 16px;
+    padding: 12px 24px;
+    align-items: end;
+    border-bottom: 1px solid rgba(0, 0, 0, .06);
+    background: #fff;
+}
+
+.box-size {
+    .label {
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: .02em;
+        font-weight: 600;
+    }
+
+    .box-radio-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+
+        // Afinado visual de radios Material
+        .mat-mdc-radio-button {
+            --mdc-theme-primary: #2563eb; // azul discreto a juego con tu activo
+        }
+    }
+}
+
+.shipping {
+    .address-field {
+        width: 100%;
+    }
+
+    // compacta el textarea para “sin scroll” general
+    .mat-mdc-form-field {
+        width: 100%;
+    }
+
+    .mat-mdc-text-field-wrapper {
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+
+    textarea[matInput] {
+        resize: vertical;
+        min-height: 40px; // ~2 filas compactas
+        max-height: 96px;
+        line-height: 1.25;
+    }
+
+    .label {
+        font-size: 12px;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: .02em;
+        font-weight: 600;
+        grid-column: 1 / -1;
+        margin-bottom: 12px;
+    }
+}
+
+/* Cabecera columnas */
+.items-header {
+    display: grid;
+    grid-template-columns:
+        minmax(280px, 1fr) 180px 220px 160px 130px 140px;
+    column-gap: 24px;
+    padding: 12px 24px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(0, 0, 0, .06);
+    background: #fff; // NUEVO: mantiene fondo fijo al hacer scroll en la lista
+}
+
+/* Lista + filas */
+.list-wrapper {
+    padding: 0;
+
+    // NUEVO: hace que solo la lista tenga scroll
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    will-change: transform; // scrolling suave
+}
+
+.item-row {
+    display: grid;
+    grid-template-columns:
+        minmax(280px, 1fr) 180px 220px 160px 130px 140px;
+    column-gap: 24px;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(0, 0, 0, .04);
+    background: #fff;
+
+    &:hover {
+        background: #fafafa;
+    }
+
+    &.completed {}
+
+    .cell {
+        display: flex;
+        align-items: center;
+        min-height: 64px;
+    }
+
+    .article {
+        gap: 16px;
+    }
+
+    .thumb {
+        width: 64px;
+        height: 64px;
+        border-radius: 8px;
+        object-fit: cover;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
+    }
+
+    .title {
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    .subtitle {
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .ean,
+    .ref,
+    .loc {
+        color: #111827;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .qty {
+        justify-content: center;
+    }
+
+    .qty-badge {
+        display: inline-flex;
+        min-width: 56px; // NUEVO: un pelín más ancho para "restante/total"
+        height: 36px;
+        padding: 0 10px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-weight: 700;
+        background: #f3f4f6;
+        border: 1px solid rgba(0, 0, 0, .06);
+
+        &.done {
+            background: #e8f5e9;
+            border-color: #a5d6a7;
+            color: #14532d;
+        }
+    }
+
+    .packed {
+        justify-content: flex-start;
+        gap: 6px; // NUEVO: separación entre botón principal y “deshacer”
+    }
+
+    .ghost-circle {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 2px solid #cfd5db;
+        background: transparent;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all .15s ease;
+
+        mat-icon {
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+            color: #6b7280;
+        }
+
+        &:hover {
+            border-color: #94a3b8;
+        }
+
+        &.active {
+            border-color: #2563eb;
+            background: rgba(37, 99, 235, .06);
+
+            mat-icon {
+                color: #2563eb;
+            }
+        }
+    }
+
+    /* NUEVO: botón deshacer (sumar 1) */
+    .minus-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 2px dashed #cfd5db;
+        background: transparent;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all .15s ease;
+
+        mat-icon {
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+            color: #64748b;
+        }
+
+        &:hover {
+            border-color: #94a3b8;
+            background: #f8fafc;
+        }
+    }
+}
+
+/* Responsivo */
+@media (max-width: 1024px) {
+    .items-header {
+        grid-template-columns: minmax(260px, 1fr) 1fr 120px 120px;
+
+        .ean,
+        .loc {
+            display: none;
+        }
+    }
+
+    .item-row {
+        grid-template-columns: minmax(260px, 1fr) 1fr 120px 120px;
+        grid-template-areas:
+            "article article qty packed"
+            "ean     ref     loc  loc";
+        row-gap: 6px;
+        column-gap: 16px;
+    }
+
+    /* NUEVO: controles se apilan mejor en tablets estrechas */
+    .controls-row {
+        grid-template-columns: 1fr; // caja arriba, dirección debajo
+        gap: 12px;
+        padding: 10px 16px;
+    }
+}
+
+@media (max-width: 600px) {
+    .items-header {
+        display: none;
+    }
+
+    .item-row {
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+            "article qty"
+            "ean     qty"
+            "ref     packed"
+            "loc     packed";
+        padding: 12px 16px;
+
+        .thumb {
+            width: 56px;
+            height: 56px;
+            border-radius: 10px;
+        }
+
+        .title {
+            font-size: 14px;
+        }
+
+        .qty-badge,
+        .ghost-circle,
+        .minus-btn {
+            min-width: 40px;
+            width: 40px;
+            height: 40px;
+        }
+    }
+
+    /* NUEVO: controles más comprimidos en móvil */
+    .controls-row {
+        gap: 8px;
+        padding: 8px 12px;
+    }
+}
+
+.item-row.scanned {
+    background: #ecfdf5;
+    /* verde suave */
+    transition: background-color .25s ease;
+}
+
+/* Centrar y evitar recortes del botón/icono */
+.cell.packed {
+    justify-content: center;
+    overflow: visible;
+    /* por si el touch-target de Material sobresale */
+}
+
+/* Ajusta el tamaño real del icon-button para que no recorte el icono */
+.ghost-circle.mat-mdc-icon-button {
+    width: 40px;
+    height: 40px;
+    padding: 0 !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #cfd5db;
+    border-radius: 50%;
+    background: transparent;
+}
+
+/* El touch target cuadrado de MDC (el que “lo oculta”) => mismo tamaño que el botón */
+.ghost-circle.mat-mdc-icon-button .mat-mdc-button-touch-target {
+    width: 40px;
+    height: 40px;
+}
+
+/* Tamaño y centrado del <mat-icon> */
+.ghost-circle mat-icon {
+    width: 22px;
+    height: 22px;
+    font-size: 22px;
+    line-height: 1;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    /* gris por defecto */
+}
+
+.ghost-circle.active {
+    background: #16a34a !important;
+    /* verde sólido */
+    border-color: #16a34a !important;
+    /* mismo verde en el borde */
+}
+
+.ghost-circle.active mat-icon {
+    color: #ffffff !important;
+    /* check blanco */
+}
+
+/* (opcional) hover del activo: un pelín más oscuro */
+.ghost-circle.active:hover {
+    background: #15803d !important;
+    border-color: #15803d !important;
+}
+
+
+/* Bloque “Cajas” */
+.box-counters {
+    height: 100%;
+    padding: 12px 24px;
+    border-bottom: 1px solid rgba(0, 0, 0, .06);
+    background: #fff;
+
+    .label {
+        font-size: 12px;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: .02em;
+        font-weight: 600;
+        grid-column: 1 / -1;
+        margin-bottom: 12px;
+    }
+
+    .cajas-div {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(200px, 1fr));
+        gap: 12px;
+    }
+
+
+
+}
+
+.box-ctrl {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: #f9fafb;
+    border: 1px solid rgba(0, 0, 0, .06);
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+
+.box-name {
+    font-weight: 600;
+}
+
+.stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    .step {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: 1px solid #cfd5db;
+        background: #fff;
+        font-size: 18px;
+        line-height: 1;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: border-color .15s ease, background .15s ease;
+
+        &:hover {
+            border-color: #94a3b8;
+            background: #f8fafc;
+        }
+
+        &:active {
+            transform: translateY(1px);
+        }
+    }
+
+    input[type='number'] {
+        width: 70px;
+        height: 36px;
+        padding: 0 10px;
+        border: 1px solid #cfd5db;
+        border-radius: 8px;
+        background: #fff;
+        text-align: center;
+        font-weight: 700;
+        -moz-appearance: textfield;
+
+        &:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+        }
+    }
+
+    /* quita flechas nativas */
+    input[type='number']::-webkit-outer-spin-button,
+    input[type='number']::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+}
+
+/* Responsive: cajas a una columna si hace falta */
+@media (max-width: 1024px) {
+    .box-counters {
+        grid-template-columns: 1fr;
+    }
+}
+
+.stepper {
+    .step {
+        border-radius: 10px;
+    }
+
+    input[type='number'] {
+        border-radius: 10px;
+        width: 64px;
+        font-variant-numeric: tabular-nums;
+    }
+}
+
+.sub .dot {
+    margin: 0 .5rem;
+    opacity: .6;
+}
+
+.sub .kv-key {
+    opacity: .7;
+    margin-right: .25rem;
+}
+
+.sub .kv {
+    display: inline;
+}
+
+.sub .sep {
+    opacity: .5;
+}

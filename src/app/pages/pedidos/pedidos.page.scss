@@ -1,0 +1,229 @@
+// === VARIABLES CSS ===
+:root {
+  --primary-color: #667eea;
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --text-primary: #2d3748;
+  --text-secondary: #718096;
+  --text-muted: #a0aec0;
+  --bg-primary: #f7fafc;
+  --bg-card: #ffffff;
+  --border-light: #e2e8f0;
+  --border-primary: #cbd5e0;
+  --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-large: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.contenedor {
+  display: flex;
+  justify-content: center;
+}
+
+.contenido {
+  width: 100%;
+  padding: 24px;
+}
+
+.contenido.sin-padding {
+  padding: 0 !important;
+}
+
+.carta {
+  margin-bottom: 1em;
+  width: 100%;
+}
+
+td {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.order-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon-16 {
+  width: 16px !important;
+  height: 16px !important;
+  line-height: 16px !important;
+  font-size: 16px !important;
+  cursor: default;
+}
+
+
+::ng-deep .dialog-actions-sticky {
+  position: sticky;
+  bottom: 0;
+  background: transparent;
+  padding: 12px 24px;
+  z-index: 10;
+  border-top: 1px solid #e6e6e6;
+}
+
+.pedido-dialog-custom .mat-mdc-dialog-container {
+  background: transparent !important;  /* quita blanco del modal */
+  box-shadow: none !important;         /* quita sombra si molesta */
+}
+
+.pedido-dialog-custom .mat-mdc-dialog-surface {
+  background: transparent !important;
+}
+
+
+// === LAYOUT PRINCIPAL ===
+.fondo-pedidos {
+  --background: var(--bg-primary);
+  min-height: 100vh;
+}
+
+ion-header {
+  margin-top: 30px;
+  --background: var(--bg-card);
+  box-shadow: var(--shadow-soft);
+  border-bottom: 1px solid var(--border-light);
+}
+
+
+
+// === TABLA ===
+.tabla-wrapper {
+  margin: 0 16px;
+}
+
+.main-panel {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.b-1.rounded {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-large);
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+}
+
+table.mat-table {
+  width: 100%;
+  background: var(--bg-card);
+}
+
+// === CABECERAS DE TABLA ===
+::ng-deep .mat-header-cell {
+  border-bottom: 1px solid var(--border-light);
+  font-weight: 600;
+  color: #666;
+  font-size: 14px;
+  padding: 12px 16px;
+}
+
+::ng-deep .mat-sort-header-container:hover {
+  background: #f5f7fa;
+}
+
+// === FILAS DE TABLA ===
+::ng-deep .mat-row:hover {
+  background: #f9f9f9;
+}
+
+::ng-deep .mat-cell {
+  padding: 16px;
+  font-size: 14px;
+  color: #333;
+}
+
+
+// === BOTONES ===
+.btn-detalles {
+  background: #5c6bc0;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  min-width: 110px;
+  height: 36px;
+}
+
+// === ESTADOS ===
+.estado-UNFULFILLED {
+  background-color: #ff9800;
+  color: #fff;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.estado-processing {
+  background-color: #2196f3;
+  /* Azul */
+  color: #fff;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.estado-shipped {
+  background-color: #4caf50;
+  /* Verde */
+  color: #fff;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.estado-delivered {
+  background-color: #9c27b0;
+  /* Morado */
+  color: #fff;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+// === RESPONSIVE ===
+@media (max-width: 768px) {
+  .barra-superior-pedidos {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .buscador-container ion-searchbar {
+    width: 100%;
+  }
+
+  .tabla-wrapper {
+    margin: 0 8px;
+    margin-right: 16px;
+  }
+}
+
+.card-pointer{
+  cursor: pointer;
+}
+
+.card-active {
+  background-color: #e6f0ff !important; /* azul clarito */
+  transition: background-color 0.3s ease;
+}
+
+.mat-column-status {
+  min-width: 130px;     /* ajusta a tu gusto: 120–160px suele ir bien */
+}
+
+.mat-column-status span {
+  white-space: nowrap;   /* mantiene el chip en una sola línea */
+}
+
+:host ::ng-deep .mat-column-status { min-width: 130px; }
+:host ::ng-deep .mat-column-status span { white-space: nowrap; }
+
+.mat-column-action {
+  min-width: 200px;     /* ajusta a tu gusto: 120–160px suele ir bien */
+}
+
+
+:host ::ng-deep .mat-column-action { min-width: 200px; }

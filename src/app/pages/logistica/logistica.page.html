@@ -1,0 +1,429 @@
+<ion-content [fullscreen]="true">
+  <div class="topcard-grid">
+    <div class="topcard-item">
+      <mat-card class="text-center">
+        <mat-card-content>
+          <img
+            src="/assets/images/newOrders.png"
+            alt="users"
+            width="70" />
+          <h4 class="f-s-14 f-w-600 text-primary m-t-8">
+            Pedidos por preparar
+          </h4>
+          <h6 class="f-s-21 f-w-600 text-primary m-t-8">
+            {{ statsLogistica?.por_preparar }}
+          </h6>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <div class="topcard-item">
+      <mat-card class="text-center">
+        <mat-card-content>
+          <img
+            src="/assets/images/orderPrepared.png"
+            alt="users"
+            width="70" />
+          <h4 class="f-s-14 f-w-600 text-primary m-t-8">
+            Preparados hoy
+          </h4>
+          <h6 class="f-s-21 f-w-600 text-primary m-t-8">
+            {{ statsLogistica?.preparados_hoy }}
+          </h6>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <div class="topcard-item">
+      <mat-card class="text-center">
+        <mat-card-content>
+          <img
+            src="/assets/images/shippedOrder.png"
+            alt="users"
+            width="70" />
+          <h4 class="f-s-14 f-w-600 text-primary m-t-8">
+            En tránsito
+          </h4>
+          <h6 class="f-s-21 f-w-600 text-primary m-t-8">
+            {{ statsLogistica?.en_transito }}
+          </h6>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <div class="topcard-item">
+      <mat-card class="text-center">
+        <mat-card-content>
+          <img
+            src="/assets/images/newEntrada.png"
+            alt="users"
+            width="70" />
+          <h4 class="f-s-14 f-w-600 text-primary m-t-8">
+            Entradas pendientes
+          </h4>
+          <h6 class="f-s-21 f-w-600 text-primary m-t-8">
+            {{ statsLogistica?.entradas_pendientes }}
+          </h6>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <div class="topcard-item">
+      <mat-card class="text-center">
+        <mat-card-content>
+          <img
+            src="/assets/images/validatedEntrada.png"
+            alt="users"
+            width="70" />
+          <h4 class="f-s-14 f-w-600 text-primary m-t-8">
+            Entradas hoy
+          </h4>
+          <h6 class="f-s-21 f-w-600 text-primary m-t-8">
+            {{ statsLogistica?.entradas_validadas_hoy }}
+          </h6>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+  </div>
+
+  <!-- NUEVO CONTENEDOR PARA GRÁFICOS -->
+  <div class="dashboard-main-content">
+    <!-- Gráficos principales del dashboard logística -->
+    <div class="dashboard-charts-row" style="display: flex; gap: 24px;">
+      <!-- Transportista -->
+      <div style="flex: 2;">
+        <mat-card class="cardWithShadow" style="height: 600px;">
+          <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 18px 18px 0 18px;">
+            <mat-card-title style="margin: 0;">Transportista</mat-card-title>
+            <mat-form-field appearance="outline"
+              style="width: 140px; margin: 0 0 0 16px;">
+              <mat-label>Mes</mat-label>
+              <mat-select [(ngModel)]="selectedMonth"
+                (ngModelChange)="onMonthChange($event)">
+                <mat-option *ngFor="let month of months" [value]="month">{{
+                  month }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <mat-card-content style="padding: 0 18px 18px 18px;">
+            <!-- Leyenda arriba -->
+            <div
+              class="d-flex align-items-center justify-content-center m-t-24">
+              <div class="d-flex align-items-center" (click)="toggleBar('PUDO')"
+                style="cursor:pointer;">
+                <span class="dot" [style.background]="'#5D87FF'"
+                  [style.opacity]="showPudo ? 1 : 0.3"></span>
+                <span class="m-l-8"
+                  [style.opacity]="showPudo ? 1 : 0.3">PUDO</span>
+              </div>
+              <div class="d-flex align-items-center m-l-16"
+                (click)="toggleBar('DOMICILIO')" style="cursor:pointer;">
+                <span class="dot" [style.background]="'#49BEFF'"
+                  [style.opacity]="showDomicilio ? 1 : 0.3"></span>
+                <span class="m-l-8"
+                  [style.opacity]="showDomicilio ? 1 : 0.3">DOMICILIO</span>
+              </div>
+              <div class="d-flex align-items-center m-l-16"
+                (click)="toggleBar('OTRO')" style="cursor:pointer;">
+                <span class="dot" [style.background]="'#FFB300'"
+                  [style.opacity]="showOtro ? 1 : 0.3"></span>
+                <span class="m-l-8"
+                  [style.opacity]="showOtro ? 1 : 0.3">OTRO</span>
+              </div>
+            </div>
+            <!-- Gráfico más abajo -->
+            <div style="margin-top: 48px;">
+              <apx-chart
+                [series]="filteredTransportistaSeries"
+                [colors]="filteredTransportistaColors"
+                [chart]="mostvisitChart.chart"
+                [xaxis]="mostvisitChart.xaxis"
+                [plotOptions]="mostvisitChart.plotOptions"
+                [dataLabels]="mostvisitChart.dataLabels"
+                [stroke]="mostvisitChart.stroke"
+                [yaxis]="mostvisitChart.yaxis"
+                [tooltip]="mostvisitChart.tooltip"
+                [legend]="mostvisitChart.legend"></apx-chart>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Producto más vendido + KPIs Media pedido y Ticket medio -->
+      <div style="flex: 2; display: flex; flex-direction: column; gap: 16px;">
+        <!-- Producto más vendido (sin ranking, con flecha dinámica) -->
+        <mat-card class="cardWithShadow">
+          <div style="padding: 18px 18px 18px 18px;">
+            <mat-card-title style="margin-bottom: 4px;">Producto más
+              vendido</mat-card-title>
+          </div>
+          <mat-card-content style="padding: 0 18px 18px 18px;">
+            <div
+              style="display: flex; align-items: center; justify-content: space-between;">
+              <div style="width: 120px;" style="margin: 0;">
+
+                <img *ngIf="productoMasVendido.image" [src]="productoMasVendido.image"
+                  [alt]="'imagen' | translate" width="100"
+                  height="100" style="border-radius:4px; " />
+              </div>
+              <div>
+                <h5 class="f-s-18 f-w-600">{{ productoMasVendido.total_vendido
+                  || 0 | number:'1.0-0' }}</h5>
+                <div class="f-s-14" style="color: #888;">{{
+                  productoMasVendido.producto || 'Sin datos' }}</div>
+                <div
+                  class="d-flex align-items-center gap: 8px; margin-top: 8px;">
+                  <button
+                    mat-mini-fab
+                    [ngClass]="{
+                      'bg-light-success text-success': productoMasVendidoHoyVerde,
+                      'bg-light-error text-error': !productoMasVendidoHoyVerde
+                    }"
+                    class="shadow-none icon-27"
+                    style="margin: 0;">
+                    <span
+                      style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                      <i-tabler
+                        [name]="productoMasVendidoHoyVerde ? 'arrow-up-left' : 'arrow-down-left'"
+                        class="icon-20"></i-tabler>
+                    </span>
+                  </button>
+                  <div class="f-s-14 f-w-600" style="margin: 0;">
+                    {{ productoMasVendido.vendidos_hoy }}
+                  </div>
+
+                </div>
+              </div>
+              <div style="width: 120px;">
+                <apx-chart
+                  [series]="pageimpChart.series"
+                  [chart]="pageimpChart.chart"
+                  [colors]="pageimpChart.colors"
+                  [grid]="pageimpChart.grid"
+                  [plotOptions]="pageimpChart.plotOptions"
+                  [dataLabels]="pageimpChart.dataLabels"
+                  [stroke]="pageimpChart.stroke"
+                  [xaxis]="pageimpChart.xaxis"
+                  [yaxis]="pageimpChart.yaxis"
+                  [fill]="pageimpChart.fill"
+                  [tooltip]="pageimpChart.tooltip"></apx-chart>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- KPIs abajo: Media pedido y Ticket medio -->
+        <div style="display: flex; gap: 16px;">
+          <!-- Media pedido -->
+          <mat-card class="cardWithShadow">
+            <div style="padding: 18px 18px 0 18px;">
+              <mat-card-title style="margin-bottom: 4px;">Media
+                pedido</mat-card-title>
+            </div>
+            <mat-card-content style="padding: 0 18px 18px 18px;">
+              <h5 class="f-s-18 f-w-600">Unidades</h5>
+              <div class="f-s-18 f-w-600" style="margin-bottom: 8px;">
+                {{ mediaPedidosMes | number:'1.2-2' }}
+              </div>
+              <div class="d-flex align-items-center m-t-8">
+                <button
+                  mat-mini-fab
+                  [ngClass]="{
+                    'bg-light-success text-success': mediaPedidoSube,
+                    'bg-light-error text-error': !mediaPedidoSube
+                  }"
+                  class="shadow-none icon-27"
+                  style="margin-right: 8px;">
+                  <span
+                    style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                    <i-tabler
+                      [name]="mediaPedidoSube ? 'arrow-up-left' : 'arrow-down-left'"
+                      class="icon-20"></i-tabler>
+                  </span>
+                </button>
+                <div class="f-s-14 f-w-600">
+                  {{ mediaPedidosDias[mediaPedidosDias.length - 1] || 0 }}
+                </div>
+              </div>
+              <!-- Nuevo gráfico tipo barra -->
+              <apx-chart
+                [series]="mediaPedidoBarChart.series"
+                [chart]="mediaPedidoBarChart.chart"
+                [plotOptions]="mediaPedidoBarChart.plotOptions"
+                [tooltip]="mediaPedidoBarChart.tooltip"
+                [stroke]="mediaPedidoBarChart.stroke"
+                [yaxis]="mediaPedidoBarChart.yaxis"
+                [grid]="mediaPedidoBarChart.grid"
+                [colors]="mediaPedidoBarChart.colors"
+                [xaxis]="mediaPedidoBarChart.xaxis"
+                [dataLabels]="mediaPedidoBarChart.dataLabels"></apx-chart>
+            </mat-card-content>
+          </mat-card>
+          <!-- Ticket medio -->
+          <mat-card class="cardWithShadow">
+            <div style="padding: 18px 18px 0 18px;">
+              <mat-card-title style="margin-bottom: 4px;">Ticket
+                medio</mat-card-title>
+            </div>
+            <mat-card-content style="padding: 0 18px 18px 18px;">
+              <h5 class="f-s-18 f-w-600">{{ ticketMedioMes | number:'1.2-2'
+                }}€</h5>
+              <div class="d-flex align-items-center m-t-8">
+                <button mat-mini-fab
+                  [ngClass]="{
+                    'bg-light-success text-success': ticketMedioDias[ticketMedioDias.length-1] >= ticketMedioDias[ticketMedioDias.length-2],
+                    'bg-light-error text-error': ticketMedioDias[ticketMedioDias.length-1] < ticketMedioDias[ticketMedioDias.length-2]
+                  }"
+                  class="shadow-none icon-27"
+                  style="margin-right: 8px;">
+                  <span
+                    style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                    <i-tabler
+                      [name]="ticketMedioDias[ticketMedioDias.length-1] >= ticketMedioDias[ticketMedioDias.length-2] ? 'arrow-up-left' : 'arrow-down-left'"
+                      class="icon-20"></i-tabler>
+                  </span>
+                </button>
+                <div class="f-s-14 f-w-600">
+                  {{ ticketMedioDias[ticketMedioDias.length-1] || 0 |
+                  number:'1.2-2' }}€
+                </div>
+              </div>
+              <apx-chart
+                [series]="projectsChart.series"
+                [chart]="projectsChart.chart"
+                [plotOptions]="projectsChart.plotOptions"
+                [tooltip]="projectsChart.tooltip"
+                [stroke]="projectsChart.stroke"
+                [yaxis]="projectsChart.yaxis"
+                [grid]="projectsChart.grid"
+                [colors]="projectsChart.colors"
+                [xaxis]="projectsChart.xaxis"
+                [dataLabels]="projectsChart.dataLabels"></apx-chart>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+
+      <!-- KPI Control (Donut) -->
+      <div style="flex: 2;">
+        <mat-card class="cardWithShadow" style="height: 600px;">
+          <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 18px 18px 0 18px;">
+            <mat-card-title style="margin: 0;">KPI Control
+              <div class="f-s-14">Este mes</div>
+            </mat-card-title>
+          </div>
+          <mat-card-content style="padding: 0 18px 18px 18px;">
+            <!-- Leyenda abajo del gráfico -->
+            <div style="margin-top: 48px;">
+              <div
+                style="position: relative; display: flex; flex-direction: column; align-items: center;">
+                <apx-chart
+                  [series]="filteredKpiSeries"
+                  [chart]="kpiControlChart.chart"
+                  [labels]="filteredKpiLabels"
+                  [colors]="filteredKpiColors"
+                  [legend]="kpiControlChart.legend"
+                  [dataLabels]="kpiControlChart.dataLabels"
+                  [plotOptions]="kpiControlChart.plotOptions"
+                  [tooltip]="kpiControlChart.tooltip"></apx-chart>
+                <div style="
+                  position: absolute; 
+                  top: 50%;
+                  left: 50%;
+                  transform: translate(-50%, -50%);
+                  font-size: 2.4rem;
+                  font-weight: 700;
+                  color: #222;
+                  pointer-events: none;
+                  z-index: 2;
+                ">
+                  {{ filteredKpiTotal | number:'1.0-0' }}
+                </div>
+              </div>
+              <!-- Leyenda manual con click y opacidad -->
+              <div
+                style="margin-top: 40px; display: flex; justify-content: center; gap: 32px;">
+                <div class="d-flex align-items-center"
+                  (click)="toggleKpiSegment(0)" style="cursor:pointer;">
+                  <span class="dot" style="background:#5D87FF;"
+                    [style.opacity]="showKpiSegment[0] ? 1 : 0.3"></span>
+                  <span class="m-l-8"
+                    [style.opacity]="showKpiSegment[0] ? 1 : 0.3">Entregados</span>
+                </div>
+                <div class="d-flex align-items-center"
+                  (click)="toggleKpiSegment(1)" style="cursor:pointer;">
+                  <span class="dot" style="background:#49BEFF;"
+                    [style.opacity]="showKpiSegment[1] ? 1 : 0.3"></span>
+                  <span class="m-l-8"
+                    [style.opacity]="showKpiSegment[1] ? 1 : 0.3">En
+                    tránsito</span>
+                </div>
+                <div class="d-flex align-items-center"
+                  (click)="toggleKpiSegment(2)" style="cursor:pointer;">
+                  <span class="dot" style="background:#e1e785ff;"
+                    [style.opacity]="showKpiSegment[2] ? 1 : 0.3"></span>
+                  <span class="m-l-8"
+                    [style.opacity]="showKpiSegment[2] ? 1 : 0.3">Otros</span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Pedidos / Unidades Vendidas + Distribución transportista -->
+    <div style="display: flex; gap: 24px; margin-top: 24px;">
+      <!-- Pedidos / Unidades Vendidas -->
+      <div style="flex: 2;">
+        <mat-card class="cardWithShadow" style="height: 370px;">
+          <mat-card-title style="padding: 18px 18px 0 18px; margin-bottom: 0;">
+            Pedidos / Unidades Vendidas
+          </mat-card-title>
+          <mat-card-content style="height: 300px;">
+            <apx-chart
+              [series]="pedidosUnidadesChart.series"
+              [chart]="pedidosUnidadesChart.chart"
+              [dataLabels]="pedidosUnidadesChart.dataLabels"
+              [stroke]="pedidosUnidadesChart.stroke"
+              [fill]="pedidosUnidadesChart.fill"
+              [colors]="pedidosUnidadesChart.colors"
+              [xaxis]="pedidosUnidadesChart.xaxis"
+              [yaxis]="pedidosUnidadesChart.yaxis"
+              [legend]="pedidosUnidadesChart.legend"
+              [tooltip]="pedidosUnidadesChart.tooltip"
+              [grid]="pedidosUnidadesChart.grid"></apx-chart>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      <!-- Distribución transportista -->
+      <div style="flex: 1;">
+        <mat-card class="cardWithShadow" style="height: 370px;">
+          <mat-card-title style="text-align: center; margin-top: 12px;">
+            Distribución transportista
+          </mat-card-title>
+          <mat-card-content style="height: 300px;">
+            <apx-chart
+              [series]="distribucionTransportistaChart.series"
+              [chart]="distribucionTransportistaChart.chart"
+              [labels]="distribucionTransportistaChart.labels"
+              [colors]="distribucionTransportistaChart.colors"
+              [legend]="distribucionTransportistaChart.legend"
+              [dataLabels]="distribucionTransportistaChart.dataLabels"
+              [stroke]="distribucionTransportistaChart.stroke"
+              [plotOptions]="distribucionTransportistaChart.plotOptions"
+              [tooltip]="distribucionTransportistaChart.tooltip"></apx-chart>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="mostrarRanking">
+    <mat-list>
+      <mat-list-item *ngFor="let prod of rankingProductos; let i = index">
+        <span>{{ i + 1 }}. {{ prod.producto }}</span>
+        <span style="margin-left:auto;">{{ prod.total_vendido }}</span>
+      </mat-list-item>
+    </mat-list>
+  </div>
+</ion-content>

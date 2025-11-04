@@ -1,0 +1,37 @@
+.contenedor {
+    display: flex;    
+    justify-content: center;
+}
+
+.contenido {
+    width: 100%;
+    padding: 24px;
+}
+
+.carta {
+    margin-bottom: 1em;
+    width: 100%;
+}
+
+td{
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+.compact-table th,
+.compact-table td {
+  padding: 5px 16px !important;
+  font-size: 13px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compact-table{
+    width: 830px !important;
+}
+ 
+
+.contenido.sin-padding {
+  padding: 0 0px 0px 20px !important;
+}

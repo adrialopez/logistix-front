@@ -1,0 +1,171 @@
+.topcard-grid {
+  display: grid;
+  gap: 1.2rem;
+  padding: 24px;
+  grid-template-columns: repeat(2, 1fr);
+
+  @media (min-width: 600px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  @media (min-width: 992px) {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+.left-header, .right-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.spacer { flex: 1 1 auto; }
+
+.avatar {
+  width: 50px;
+  height: 50px;
+}
+
+.sombra-tarjeta {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+h4 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.container-centered.two-column {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 0;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .container-centered.two-column {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Estrechar columnas de la tabla de entradas */
+.widget-entradas table.mat-table th,
+.widget-entradas table.mat-table td {
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+  font-size: 13px;
+  max-width: 90px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Opcional: columnas específicas aún más estrechas */
+.widget-entradas table.mat-table th.f-s-13,
+.widget-entradas table.mat-table td.f-s-13 {
+  max-width: 70px;
+}
+
+/* Eliminar padding de mat-card-content solo en las tarjetas de Entradas y Pedidos */
+.widget-entradas .mat-card-content,
+.widget-pedidos .mat-card-content {
+  padding: 0 !important;
+}
+
+.widget-entradas,
+.widget-pedidos {
+  margin: 0 !important;
+}
+
+.container-centered mat-card,
+.container-centered .cardWithShadow {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  /* Si hay border, puedes quitarlo también: */
+  border: none !important;
+}
+
+// logistica.page.scss
+
+// Selecciona la segunda fila de widgets y súbela
+.logistica-widgets .container-centered.two-column:nth-child(2) {
+  position: relative;
+  top: -120px; // Ajusta el valor según lo que necesites
+  height: 1px;
+}
+
+.widget-title {
+  text-align: left;
+  margin-left: 30px;
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-top: 20px;
+  bottom: 20px;
+  letter-spacing: 0.5px;
+  color: #222;
+  text-shadow: 0 1px 0 #fff, 0 2px 4px rgba(0,0,0,0.04);
+  /* Puedes ajustar el color y el sombreado a tu gusto */
+}
+
+.dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+.m-l-8 { margin-left: 8px; }
+.m-l-16 { margin-left: 16px; }
+.m-t-24 { margin-top: 24px; }
+
+.cardWithShadow {
+  border-radius: 18px !important;
+  background: #fff !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+}
+
+.mat-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0;
+  margin-top: 0;
+}
+
+.mat-form-field {
+  margin-top: 0 !important;
+}
+
+.mat-card-content {
+  padding-top: 0 !important;
+  padding-bottom: 18px !important;
+  padding-left: 18px !important;
+  padding-right: 18px !important;
+}
+
+.mat-mdc-card{
+  margin-bottom: 0px !important;
+}
+
+.dashboard-main-content {
+  padding-left: 24px;
+  padding-right: 24px;
+}
+@media (max-width: 900px) {
+  .dashboard-main-content {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+

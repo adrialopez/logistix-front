@@ -1,0 +1,157 @@
+<div class="d-flex align-items-center justify-content-between m-b-8 p-x-20 p-t-16">
+  <h3>{{ action | translate }} {{ 'entrada_lote' | translate }}</h3>
+  <button mat-icon-button mat-dialog-close class="d-flex justify-content-center">
+    <i-tabler name="x" class="icon-20 d-flex"></i-tabler>
+  </button>
+</div>
+
+<!-- -------------------------------------------------------------- -->
+<!-- Add Employee -->
+<!-- -------------------------------------------------------------- -->
+
+@if(action !== 'Delete') {
+<mat-dialog-content>
+  <form #userForm="ngForm">
+    @if(action === 'Update') {
+    <div class="d-flex align-items-center gap-16 m-b-16">
+      <img class="rounded-circle" [src]="local_data.product_image" width="45" />
+      <div>
+        <h6 class="f-w-600 f-s-16 m-t-0">
+          {{ local_data.product_name }}
+        </h6>
+        <span class="f-s-14">{{ local_data.variant_name }}</span>
+      </div>
+    </div>
+    }
+    <div class="row">
+      @if(action === 'Add') {
+
+      <div class="col-lg-6">
+        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">{{ 'producto' | translate }}</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input
+            type="text"
+            matInput
+            [matAutocomplete]="autoProducto"
+            [(ngModel)]="productoLabel"
+            name="productoLabel"
+            (ngModelChange)="filterProductos($event)"
+            [placeholder]="'selecciona_producto' | translate" />
+
+          <mat-autocomplete #autoProducto="matAutocomplete" autoActiveFirstOption
+            (optionSelected)="onProductoSelected($event.option.value)">
+            <mat-option *ngFor="let p of filteredProductos" [value]="p">
+              {{ (p.label || '') | translate }}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+      </div>
+      <div class="col-lg-6">
+        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">{{ 'variante' | translate }}</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-select [(ngModel)]="varianteSeleccionada" [placeholder]="'selecciona_variante' | translate"
+            name="varianteSeleccionada">
+            <mat-option *ngFor="let variante of varianteOptions" [value]="variante.value">
+              {{ (variante.label || '') | translate }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="col-lg-6">
+        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">{{ 'almacen' | translate }}</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-select [(ngModel)]="selectedLocation" [placeholder]="'selecciona_almacen' | translate" name="selectedLocation">
+            <mat-option *ngFor="let location of locationOptions" [value]="location.value">
+              {{ (location.label || '') | translate }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      }
+      <div class="col-lg-6">
+        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">{{ 'numero_lote' | translate }}</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input type="text" matInput required id="numero_lote" name="numero_lote" [(ngModel)]="local_data.lote_number"
+            [placeholder]="'numero' | translate" />
+        </mat-form-field>
+      </div>
+
+      <div class="col-lg-6">
+        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+          {{ action === 'Add' ? ('stock_inicial' | translate) : ('stock_actual' | translate) }}
+        </mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input type="number" matInput required name="remaining" [(ngModel)]="local_data.remaining"
+            [disabled]="action === 'Update'" [placeholder]="'introduce_stock' | translate" />
+          <mat-hint *ngIf="action === 'Update'">
+            {{ 'stock_resultante' | translate }}: {{ stockResultante }}
+          </mat-hint>
+        </mat-form-field>
+      </div>
+      @if(action === 'Update') {
+      <div class="col-lg-6">
+        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+          {{ 'metodo_actualizacion' | translate }}
+        </mat-label>
+        <mat-radio-group [(ngModel)]="modoRelativo" (ngModelChange)="onModoChange($event)" name="modoRelativo"
+          class="d-flex gap-3">
+          <mat-radio-button [value]="false">{{ 'valor_absoluto' | translate }}</mat-radio-button>
+          <mat-radio-button [value]="true">{{ 'ajuste_relativo' | translate }}</mat-radio-button>
+        </mat-radio-group>
+      </div>
+      <div class="col-lg-6">
+        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">{{ 'nuevo_stock' | translate }}</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input type="number" matInput [(ngModel)]="nuevoStock" name="nuevoStock"
+            [placeholder]="modoRelativo ? ('unidades' | translate) : ('total_final' | translate)" />
+          <mat-hint>
+            {{ 'stock_resultante' | translate }}: {{ stockResultante }}
+          </mat-hint>
+        </mat-form-field>
+      </div>
+      }
+      <div class="col-lg-6">
+        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">{{ 'fecha_caducidad' | translate }}</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input matInput [matDatepicker]="picker" [formControl]="joiningDate" [placeholder]="'escoge_fecha' | translate" />
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      </div>
+      <div class="col-lg-12">
+        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">{{ 'observaciones' | translate }}</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <textarea type="text" matInput id="obs" name="obs" [(ngModel)]="local_data.observations"
+            [placeholder]="'observaciones' | translate"></textarea>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <button style="float: right;" mat-flat-button (click)="doAction()" class="m-l-8" mat-flat-button
+      [disabled]="!userForm.valid">
+      {{ action | translate }}
+    </button>
+    <button style="float: right;" mat-flat-button class="bg-error text-white" (click)="closeDialog()">
+      {{ 'cancelar' | translate }}
+    </button>
+
+  </form>
+</mat-dialog-content>
+}
+<!-- -------------------------------------------------------------- -->
+<!-- Delete Employee info -->
+<!-- -------------------------------------------------------------- -->
+
+@else {
+<div class="p-x-24 m-y-8">
+  <p class="f-s-14">
+    {{ 'seguro_borrar' | translate }} <span class="f-w-600">{{local_data.lote_number}}</span> ?
+  </p>
+</div>
+<div mat-dialog-actions class="p-x-24 p-b-24">
+  <button mat-flat-button (click)="closeDialog()" class="m-l-8 bg-error text-white">
+    {{ 'cancelar' | translate }}
+  </button>
+  <button (click)="doAction()" mat-flat-button>{{ action | translate }}</button>
+</div>
+}

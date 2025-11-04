@@ -1,0 +1,206 @@
+<!-- ticket-dialog-content.html -->
+<div class="d-flex align-items-center justify-content-between m-b-8 p-x-20 p-t-16">
+  <h3>{{ getActionKey() | translate }} {{ 'ticket' | translate }}</h3>
+  <button mat-icon-button mat-dialog-close class="d-flex justify-content-center">
+    <i-tabler name="x" class="icon-20 d-flex"></i-tabler>
+  </button>
+</div>
+
+@if(action !== 'Delete') {
+<mat-dialog-content class="mat-typography">
+  <div class="row">
+    <!-- Tipo de Ticket -->
+    <div class="col-sm-6 col-lg-6">
+      <mat-label class="f-s-14 f-w-600 m-b-8 d-block">{{ 'tipo_ticket' | translate }} *</mat-label>
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-select
+          [formControl]="ticketTypeIdControl"
+          [placeholder]="'selecciona_tipo' | translate"
+          required
+          (selectionChange)="onTicketTypeChange($event.value)">
+          @for (type of ticketTypes; track type.id) {
+            <mat-option [value]="type.id">{{ getTicketTypeLabel(type.nombre) | translate }}</mat-option>
+          }
+        </mat-select>
+        <mat-error *ngIf="ticketTypeIdControl.hasError('required')">
+          {{ 'tipo_ticket_requerido' | translate }}
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Prioridad -->
+    <div class="col-sm-6 col-lg-6">
+      <mat-label class="f-s-14 f-w-600 m-b-8 d-block">{{ 'prioridad' | translate }} *</mat-label>
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-select [formControl]="prioridadControl" [placeholder]="'selecciona_prioridad' | translate" required>
+          <mat-option value="alta">{{ 'alta' | translate }}</mat-option>
+          <mat-option value="media">{{ 'media' | translate }}</mat-option>
+          <mat-option value="baja">{{ 'baja' | translate }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="prioridadControl.hasError('required')">
+          {{ 'prioridad_requerida' | translate }}
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Estado (solo Update o View) -->
+    @if ((action === 'Update' || action === 'View')) {
+      <div class="col-sm-6 col-lg-6">
+        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">{{ 'estado' | translate }}</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-select [formControl]="estadoControl" [placeholder]="'selecciona_estado' | translate">
+            <mat-option value="pendiente">{{ 'pendiente' | translate }}</mat-option>
+            <mat-option value="en_proceso">{{ 'en_proceso' | translate }}</mat-option>
+            <mat-option value="resuelto">{{ 'resuelto' | translate }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    }
+
+    <!-- Comentarios Internos (descripción) -->
+    <div class="col-sm-6 col-lg-12">
+      <mat-label class="f-s-14 f-w-600 m-b-8 d-block">{{ 'descripcion' | translate }}</mat-label>
+      <mat-form-field appearance="outline" class="w-100">
+        <textarea
+          matInput
+          rows="3"
+          [formControl]="comentariosControl"
+          [placeholder]="'descripcion' | translate">
+        </textarea>
+      </mat-form-field>
+    </div>
+
+    <!-- Resolución (requerida cuando estado === resuelto) -->
+    @if ((action === 'Update' || action === 'View') && estadoControl.value === 'resuelto') {
+      <div class="col-sm-6 col-lg-6">
+        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">{{ 'resolucion' | translate }} *</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <textarea
+            matInput
+            rows="3"
+            [formControl]="resolucionControl"
+            [placeholder]="'resolucion_placeholder' | translate"
+            required>
+          </textarea>
+          <mat-error *ngIf="resolucionControl.hasError('required')">
+            {{ 'resolucion_requerida' | translate }}
+          </mat-error>
+        </mat-form-field>
+      </div>
+    }
+
+    <!-- CAMPOS DINÁMICOS -->
+    @if (ticketTypeIdControl.value && ticketFieldsForSelectedType.length > 0) {
+      <div class="col-12">
+        <mat-divider class="m-y-16"></mat-divider>
+        <h4 class="m-b-16">{{ 'info_especifica' | translate }}</h4>
+
+        @for (field of ticketFieldsForSelectedType; track field.id) {
+          <div class="col-sm-6 col-lg-12 m-b-16">
+            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+              {{ field.nombre }} @if (field.es_requerido) { * }
+            </mat-label>
+
+            <mat-form-field appearance="outline" class="w-100">
+              @if (field.tipo === 'text') {
+                <input matInput [(ngModel)]="fieldValues[field.id]" [name]="'dynamicField_' + field.id" [placeholder]="field.nombre" [required]="field.es_requerido">
+              }
+              @if (field.tipo === 'number') {
+                <input matInput type="number" [(ngModel)]="fieldValues[field.id]" [name]="'dynamicField_' + field.id" [placeholder]="field.nombre" [required]="field.es_requerido">
+              }
+              @if (field.tipo === 'date') {
+                <input matInput type="date" [(ngModel)]="fieldValues[field.id]" [name]="'dynamicField_' + field.id" [required]="field.es_requerido">
+              }
+              @if (field.tipo === 'textarea') {
+                <textarea matInput rows="3" [(ngModel)]="fieldValues[field.id]" [name]="'dynamicField_' + field.id" [placeholder]="field.nombre" [required]="field.es_requerido"></textarea>
+              }
+              @if (field.tipo === 'select') {
+                <mat-select [(ngModel)]="fieldValues[field.id]" [name]="'dynamicField_' + field.id" [placeholder]="('selecciona' | translate) + ' ' + field.nombre" [required]="field.es_requerido">
+                  @if (field.nombre.toLowerCase().includes('pedido')) {
+                    <mat-option value="pedido_001">Pedido #001</mat-option>
+                    <mat-option value="pedido_002">Pedido #002</mat-option>
+                    <mat-option value="pedido_003">Pedido #003</mat-option>
+                  } @else {
+                    <mat-option value="opcion1">{{ 'opcion1' | translate }}</mat-option>
+                    <mat-option value="opcion2">{{ 'opcion2' | translate }}</mat-option>
+                  }
+                </mat-select>
+              }
+              @if (field.es_requerido) {
+                <mat-error>{{ field.nombre }} {{ 'es_requerido' | translate }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Info adicional: comentario opcional + historial -->
+    @if (action === 'Update' || action === 'View'){
+      <div class="col-12">
+        <mat-divider class="m-y-16"></mat-divider>
+        <h4 class="m-b-8">{{ 'info_adicional' | translate }}</h4>
+
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>{{ 'comentario_historial' | translate }} ({{ 'opcional' | translate }})</mat-label>
+          <textarea
+            matInput
+            rows="3"
+            [formControl]="newComment">
+          </textarea>
+          <mat-hint align="end">{{ (newComment.value?.length || 0) }}/1000</mat-hint>
+        </mat-form-field>
+
+        <div class="m-t-8">
+          <h5 class="m-b-8">{{ 'historial_mensajes' | translate }}</h5>
+
+          <div *ngIf="comments.length === 0" class="text-muted">
+            {{ 'no_mensajes' | translate }}
+          </div>
+
+          <div *ngFor="let c of comments" class="p-12 m-b-8 b-1 rounded message" [ngClass]="isOwn(c) ? 'msg-own' : 'msg-other'">
+            <div class="d-flex justify-content-between f-s-12 text-muted m-b-6">
+              <span class="f-w-600">{{ c.autor || (isOwn(c) ? 'Tú' : ('usuario' | translate)) }}</span>
+              <span>{{ (c.created_at || c.created_at) | date:'dd/MM/yyyy, HH:mm' }}</span>
+            </div>
+            <div class="f-s-14" style="white-space: pre-wrap;">
+              {{ c.mensaje }}
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Acciones: un único botón de guardar -->
+  <div mat-dialog-actions align="end" class="m-t-24" *ngIf="action !== 'View'">
+    <button mat-stroked-button color="primary" (click)="dialogRef.close()">
+      {{ 'cancelar' | translate }}
+    </button>
+    <button
+      mat-flat-button
+      color="warn"
+      (click)="doAction()"
+      [disabled]="!isFormValid()">
+      {{ 'guardar' | translate }}
+    </button>
+  </div>
+</mat-dialog-content>
+}
+@else {
+<!-- Confirmación de eliminación -->
+<div class="p-x-24 p-b-24">
+  <h3>{{ 'confirmar_eliminacion' | translate }}</h3>
+  <p>{{ 'seguro_eliminar_ticket' | translate }} <strong>#{{local_data.id}}</strong>?</p>
+  @if (local_data.title) {
+    <p class="text-muted">{{local_data.title}}</p>
+  }
+</div>
+
+<div mat-dialog-actions class="p-24 p-t-0">
+  <button mat-flat-button (click)="dialogRef.close()">{{ 'cancelar' | translate }}</button>
+  <button mat-flat-button class="bg-error text-white" (click)="doAction()">
+    {{ 'eliminar' | translate }}
+  </button>
+</div>
+}

@@ -1,0 +1,183 @@
+<ion-content [fullscreen]="true">
+  <div class="contenedor">
+    <div class="contenido">
+
+      <mat-card class="order-items-card cardWithShadow"
+        *ngIf="currentOrder; else noData">
+
+        <!-- Selector de impresora (fila extra dentro de controls-row) -->
+        <div class="printer">
+          <div class="d-flex" style="gap:8px; align-items:center;">
+            <mat-form-field appearance="outline" class="p-20 w-20">
+              <mat-label>Impresora</mat-label>
+              <mat-select [(value)]="selectedPrinter"
+                (selectionChange)="onPrinterChange($event.value)"
+                [disabled]="loadingPrinters || !printers.length">
+                <mat-option *ngFor="let p of printers" [value]="p">{{ p
+                  }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <button mat-icon-button (click)="refreshPrinters()"
+              [disabled]="loadingPrinters"
+              matTooltip="Actualizar lista">
+              <mat-icon>refresh</mat-icon>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Topbar: info pedido + nav -->
+        <div class="topbar">
+          <div class="left">
+            <div class="order-number">{{ currentOrder?.order_number }}</div>
+            <div class="sub">
+              <span>{{ currentOrder?.customer_name }}</span>
+              <span class="dot">•</span>
+              <span>{{ currentOrder?.created_at | date:'dd/MM/yyyy HH:mm'
+                }}</span>
+              <span class="dot">•</span>
+              <span>{{ currentOrder?.status }}</span>
+              <ng-container *ngIf="addressFields">
+                <span class="dot">•</span>
+
+                <!-- Iteramos tus key/values tal cual -->
+                <ng-container
+                  *ngFor="let kv of addressFields | keyvalue; let last = last">
+                  <span class="kv">
+                    <span class="kv-val">{{ kv.key }}: </span>
+                    <span class="kv-key">{{ kv.value || '—' }}</span>
+                  </span>
+                  <span class="sep" *ngIf="!last">, </span>
+                </ng-container>
+              </ng-container>
+            </div>
+          </div>
+
+          <div class="right">
+
+            <button mat-stroked-button color="primary"
+              (click)="skipOrder()">Saltar</button>
+
+          </div>
+        </div>
+
+        <!-- Controles compactos (caja + dirección) -->
+        <div class="controls-row">
+          <div class="box-counters">
+            <div class="label">Cajas</div>
+
+            <div class="cajas-div">
+
+              <div class="box-ctrl">
+                <span class="box-name">S</span>
+                <div class="stepper">
+                  <button type="button" class="step" (click)="decBox('S')"
+                    aria-label="Restar caja pequeña">−</button>
+                  <input type="number" min="0" [(ngModel)]="boxQty.S"
+                    (ngModelChange)="normalizeBox('S')" />
+                  <button type="button" class="step" (click)="incBox('S')"
+                    aria-label="Sumar caja pequeña">+</button>
+                </div>
+              </div>
+
+              <div class="box-ctrl">
+                <span class="box-name">M</span>
+                <div class="stepper">
+                  <button type="button" class="step" (click)="decBox('M')"
+                    aria-label="Restar caja mediana">−</button>
+                  <input type="number" min="0" [(ngModel)]="boxQty.M"
+                    (ngModelChange)="normalizeBox('M')" />
+                  <button type="button" class="step" (click)="incBox('M')"
+                    aria-label="Sumar caja mediana">+</button>
+                </div>
+              </div>
+
+              <div class="box-ctrl">
+                <span class="box-name">L</span>
+                <div class="stepper">
+                  <button type="button" class="step" (click)="decBox('L')"
+                    aria-label="Restar caja grande">−</button>
+                  <input type="number" min="0" [(ngModel)]="boxQty.L"
+                    (ngModelChange)="normalizeBox('L')" />
+                  <button type="button" class="step" (click)="incBox('L')"
+                    aria-label="Sumar caja grande">+</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Cabecera columnas -->
+        <div class="items-header grid">
+          <div class="col article">ARTÍCULO</div>
+          <div class="col ean">EAN</div>
+          <div class="col ref">SKU</div>
+          <div class="col loc">Peso/Ud.</div>
+          <div class="col qty">CANTIDAD ({{ totalQty }})</div>
+          <div class="col packed">EMPAQUETADO ({{ packedCount }}/{{
+            orderItems.length }})</div>
+        </div>
+
+        <!-- Lista (scrollable) -->
+        <div class="list-wrapper" [@slideIndex]="currentIndex">
+          <div class="item-row grid"
+            *ngFor="let it of orderItems; index as i; trackBy: trackByIdx"
+            [class.scanned]="scannedIndex === i">
+
+            <div class="cell article">
+              <img class="thumb" [src]="it.image" alt />
+              <div class="meta">
+                <div class="title" [class.completed]="it.picked === it.qty">{{
+                  it.title }}</div>
+                <div class="subtitle" *ngIf="it.subtitle"
+                  [class.completed]="it.picked === it.qty">{{ it.subtitle }}
+                </div>
+              </div>
+            </div>
+
+            <div class="cell ean" [class.completed]="it.picked === it.qty">{{
+              it.ean || '—' }}</div>
+            <div class="cell ref" [class.completed]="it.picked === it.qty">{{
+              it.reference || '—' }}</div>
+            <div class="cell loc" [class.completed]="it.picked === it.qty">{{
+              it.weight || '—' }} Kg.</div>
+
+            <div class="cell qty">
+              <!-- Muestra progreso: restantes / total -->
+              <span class="qty-badge" [class.done]="it.picked === it.qty">
+                {{ it.picked }} / {{ it.qty }}
+              </span>
+            </div>
+
+            <div class="cell packed">
+              <!-- Botón principal: resta 1 (clic o pistola) -->
+              <button mat-icon-button class="ghost-circle"
+                [class.active]="it.picked === it.qty" (click)="increment(i)"
+                [disabled]="it.picked === it.qty" aria-label="Marcar 1 unidad">
+                <mat-icon *ngIf="it.picked === it.qty">check</mat-icon>
+                <mat-icon
+                  *ngIf="it.picked < it.qty">radio_button_checked</mat-icon>
+              </button>
+
+              <!-- Deshacer: restar 1 -->
+              <button mat-icon-button class="ghost-circle minus-btn"
+                *ngIf="it.picked > 0" (click)="decrement(i)"
+                aria-label="Deshacer 1 unidad">
+                <mat-icon>remove_circle_outline</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </mat-card>
+
+      <ng-template #noData>
+        <mat-card class="cardWithShadow p-24">
+          No hay pedidos para mostrar.
+        </mat-card>
+      </ng-template>
+    </div>
+  </div>
+</ion-content>

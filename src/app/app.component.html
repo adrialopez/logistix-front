@@ -1,0 +1,86 @@
+<mat-sidenav-container class="mainWrapper" autosize>
+  <mat-sidenav #leftsidenav [mode]="isOver ? 'over' : 'side'" [opened]="showMenu && !isOver" class="sidebarNav">
+    <div class="flex-layout">
+
+      <!-- Foto/logo arriba -->
+      <div class="d-flex align-items-center justify-content-center" style="padding-top: 32px !important;
+    padding-bottom: 16px !important;
+    /* padding-left: 16px !important; */
+    padding-right: 16px;">
+        <img src="https://logistix.es/wp-content/uploads/LOGOS_Mesa-de-trabajo-1.png#133" alt="Logistix Logo"
+          class="menu-logo" width="160" />
+      </div>
+
+      <!-- Botón cerrar en móvil -->
+      <div class="d-flex align-items-center justify-content-between branding" *ngIf="isOver">
+        <button mat-icon-button (click)="leftsidenav.toggle()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <!-- Menú -->
+      <mat-nav-list class="sidebar-list">
+        <ng-container *ngFor="let p of visiblePages">
+          <a mat-list-item [disabled]="p.disabled" [routerLink]="!p.action ? [p.url] : null"
+            routerLinkActive="active-link" (click)="p.action ? onMenuClick(p) : null">
+            <mat-icon matListItemIcon>{{ p.icon }}</mat-icon>
+            <span>{{ p.title | translate }}</span>
+          </a>
+        </ng-container>
+
+        <!-- Selector de idioma como un menú normal, alineado con los otros -->
+        <a mat-list-item [matMenuTriggerFor]="langMenu" aria-label="Cambiar idioma" style="cursor:pointer;">
+          <img matListItemIcon [src]="'assets/flags/1x1/' + (currentLang === 'en' ? 'gb' : currentLang) + '.svg'"
+            width="24" height="24" style="border-radius:50%;margin-right:12px;">
+          <span>{{ 'lenguas' | translate }}</span>
+          <mat-icon matListItemIcon style="margin-left:auto; display: none !important;">expand_more</mat-icon>
+        </a>
+      </mat-nav-list>
+      <mat-menu #langMenu="matMenu">
+        <button mat-menu-item (click)="changeLang('es')">
+          <img src="assets/flags/1x1/es.svg" width="20" height="20" style="border-radius:50%;margin-right:8px;">
+          {{ 'idioma_es' | translate }}
+        </button>
+        <button mat-menu-item (click)="changeLang('en')">
+          <img src="assets/flags/1x1/gb.svg" width="20" height="20" style="border-radius:50%;margin-right:8px;">
+          {{ 'idioma_en' | translate }}
+        </button>
+        <button mat-menu-item (click)="changeLang('fr')">
+          <img src="assets/flags/1x1/fr.svg" width="20" height="20" style="border-radius:50%;margin-right:8px;">
+          {{ 'idioma_fr' | translate }}
+        </button>
+        <button mat-menu-item (click)="changeLang('de')">
+          <img src="assets/flags/1x1/de.svg" width="20" height="20" style="border-radius:50%;margin-right:8px;">
+          {{ 'idioma_de' | translate }}
+        </button>
+      </mat-menu>
+      <mat-divider></mat-divider>
+      <div class="m-3 d-flex align-items-center justify-content-center">
+      </div>
+
+      <!-- Perfil / Simulador -->
+      <div class="p-24 m-t-auto profile-bar">
+        <div class="m-l-16">
+          <span style="font-size: 14px;">{{ 'label_usuario' | translate }}: {{
+            userEmail }}</span>
+        </div>
+
+        <mat-form-field appearance="outline" class="w-100" *ngIf="role === 'admin'" style="margin-top: 1em;">
+          <mat-label>{{ 'simular_usuario' | translate }}</mat-label>
+          <mat-select [(ngModel)]="userSeleccionado" (ngModelChange)="onUserChange($event)">
+            <mat-option *ngFor="let user of usersOptions" [value]="user.value">
+              {{ user.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <ion-router-outlet></ion-router-outlet>
+    <div class="global-loading" *ngIf="(loading$ | async)">
+      <div class="spinner" role="progressbar" aria-label="Cargando"></div>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
